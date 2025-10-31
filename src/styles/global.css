@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'PP Editorial New';
+  src: url('/src/assets/fonts/PPEditorialNew-Ultralight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Fraktion Sans';
+  src: url('/src/assets/fonts/PPFraktionSans-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --breakpoint-xs: 20rem;      /* 320px - Mobile small */
+  --breakpoint-sm: 40rem;      /* 640px - Mobile large */
+  --breakpoint-md: 64rem;      /* 1024px - Tablet */
+  --breakpoint-lg: 95rem;      /* 1520px - Desktop */
+  --breakpoint-xl: 120rem;     /* 1920px - Desktop large */
+  --breakpoint-2xl: 120.0625rem; /* 1921px - Desktop extra large */
+  
+  --font-editorial: 'PP Editorial New', serif;
+  --font-fraktion: 'PP Fraktion Sans', sans-serif;
+}
+
+* {
+  font-family: var(--font-fraktion);
+  font-size: 1rem;
+  line-height: 1.625;
+  font-weight: 500;
+}

@@ -1,0 +1,29 @@
+---
+interface Props {
+	device?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+	padding?: string;
+	class?: string;
+}
+
+const { device = 'xs', padding = '0.5rem', class: className = '' } = Astro.props;
+
+const deviceClass = {
+	xs: 'xs:flex',
+	sm: 'sm:flex',
+	md: 'md:flex',
+	lg: 'lg:flex',
+	xl: 'xl:flex',
+	'2xl': '2xl:flex'
+}[device];
+---
+
+<div class={`hidden ${deviceClass} items-center ${className}`}>
+	<span class="bracket" style={`padding-right: ${padding};`}>[</span>
+	<slot />
+	<span class="bracket" style={`padding-left: ${padding};`}>]</span>
+</div>
+
+<!-- Affichage sans brackets pour les devices inférieurs -->
+<div class={deviceClass?.replace('flex', 'hidden')}>
+	<slot />
+</div>

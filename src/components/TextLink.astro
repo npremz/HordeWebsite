@@ -1,0 +1,27 @@
+---
+interface Props {
+	href: string;
+	before?: string;
+	class?: string;
+}
+
+const { href, before = '', class: className = '' } = Astro.props;
+---
+
+<a href={href} class={`text-link ${className}`} data-before={before}>
+	<slot />
+</a>
+
+<style>
+	.text-link {
+		position: relative;
+		text-decoration: none;
+		border-bottom: 1px solid black;
+		padding-bottom: 0.25rem;
+		display: inline-block;
+	}
+
+	.text-link::before {
+		content: attr(data-before);
+	}
+</style>

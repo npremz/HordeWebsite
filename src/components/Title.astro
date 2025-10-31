@@ -1,0 +1,11 @@
+---
+interface Props {
+	tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+}
+
+const { tag: Tag = 'h1' } = Astro.props;
+---
+
+<Tag class="font-editorial font-[200] text-[1.25rem] leading-[1.4] sm:text-[1.875rem] 2xl:text-[2.25rem] 2xl:leading-[2.8125]">
+	<slot />
+</Tag>
