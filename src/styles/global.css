@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+body {
+  font-family: var(--font-fraktion);
+  font-size: 1rem;
+  line-height: 1.625;
+  font-weight: 500;
+}
+
 @font-face {
   font-family: 'PP Editorial New';
   src: url('/src/assets/fonts/PPEditorialNew-Ultralight.ttf') format('truetype');
@@ -26,11 +33,4 @@
   
   --font-editorial: 'PP Editorial New', serif;
   --font-fraktion: 'PP Fraktion Sans', sans-serif;
-}
-
-* {
-  font-family: var(--font-fraktion);
-  font-size: 1rem;
-  line-height: 1.625;
-  font-weight: 500;
 }
