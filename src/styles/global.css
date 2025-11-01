@@ -7,6 +7,10 @@ body {
   font-weight: 500;
 }
 
+:root{
+  --line-margin: 1rem
+}
+
 @font-face {
   font-family: 'PP Editorial New';
   src: url('/src/assets/fonts/PPEditorialNew-Ultralight.ttf') format('truetype');
@@ -33,4 +37,22 @@ body {
   
   --font-editorial: 'PP Editorial New', serif;
   --font-fraktion: 'PP Fraktion Sans', sans-serif;
+  
+  --color-outline: #c4c4c4;
+
+  --spacing-circles: calc(100% - 2 * var(--line-margin));
+}
+
+.hidden-trick {
+    position: relative;
+    border: none;
+    display: block;
+    width: 0px;
+    height: 0px;
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
 }

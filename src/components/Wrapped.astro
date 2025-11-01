@@ -1,13 +1,14 @@
 ---
 interface Props {
-	device?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+	device?: 'all' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 	padding?: string;
 	class?: string;
 }
 
-const { device = 'xs', padding = '0.5rem', class: className = '' } = Astro.props;
+const { device = 'all', padding = '0.5rem', class: className = '' } = Astro.props;
 
 const deviceClass = {
+	all: '!flex',
 	xs: 'xs:flex',
 	sm: 'sm:flex',
 	md: 'md:flex',
@@ -24,6 +25,6 @@ const deviceClass = {
 </div>
 
 <!-- Affichage sans brackets pour les devices inférieurs -->
-<div class={deviceClass?.replace('flex', 'hidden')}>
+<div class={deviceClass?.replace('flex', 'hidden').replace('!', '')}>
 	<slot />
 </div>

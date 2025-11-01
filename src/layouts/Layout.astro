@@ -20,6 +20,8 @@ const { title = 'Horde' } = Astro.props;
 	</head>
 	<body>
 		<Header></Header>
+		<span class="fixed h-full w-px top-0 left-4 bg-outline"></span>
 		<slot />
+		<span class="fixed h-full w-px top-0 right-4 bg-outline"></span>
 	</body>
 </html>
