@@ -1,0 +1,111 @@
+---
+// Composant canvas d'arrière-plan avec effet de pixels progressifs
+---
+
+<canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+
+<script>
+  const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  
+  let pixelSize = 20;
+  let pixels: { x: number; y: number; alpha: number }[] = [];
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  function getProjectSectionPosition(): number | null {
+    const projectSection = document.getElementById('projects');
+    if (!projectSection) return null;
+    
+    const rect = projectSection.getBoundingClientRect();
+    return rect.top + window.scrollY;
+  }
+  
+  function updatePixels() {
+    const scrollY = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const projectPos = getProjectSectionPosition();
+    
+    if (!projectPos) {
+      pixels = [];
+      return;
+    }
+    
+    const triggerDistance = 500;
+    const distanceToProject = projectPos - (scrollY + viewportHeight);
+    
+    const progress = Math.max(0, Math.min(1, 1 - distanceToProject / triggerDistance));
+    
+    if (progress === 0) {
+      pixels = [];
+      return;
+    }
+    
+    // Calculer tous les pixels possibles pour remplir complètement l'écran
+    const cols = Math.floor(canvas.width / pixelSize) + 1;
+    const rows = Math.floor(canvas.height / pixelSize) + 1;
+    const maxPixels = cols * rows;
+    
+    // À 100% de progression, on veut TOUS les pixels
+    const targetPixelCount = Math.floor(maxPixels * progress);
+    
+    // Créer un Set des positions déjà occupées
+    const occupiedPositions = new Set(pixels.map(p => `${p.x},${p.y}`));
+    
+    // Générer toutes les positions possibles non occupées
+    const availablePositions: {x: number, y: number}[] = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * pixelSize;
+        const y = row * pixelSize;
+        if (!occupiedPositions.has(`${x},${y}`)) {
+          availablePositions.push({x, y});
+        }
+      }
+    }
+    
+    // Mélanger les positions disponibles
+    for (let i = availablePositions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [availablePositions[i], availablePositions[j]] = [availablePositions[j], availablePositions[i]];
+    }
+    
+    // Ajouter les pixels manquants
+    const pixelsToAdd = targetPixelCount - pixels.length;
+    if (pixelsToAdd > 0) {
+      for (let i = 0; i < Math.min(pixelsToAdd, availablePositions.length); i++) {
+        pixels.push({
+          x: availablePositions[i].x,
+          y: availablePositions[i].y,
+          alpha: 1
+        });
+      }
+    } else if (pixelsToAdd < 0) {
+      pixels.length = targetPixelCount;
+    }
+  }
+  
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    pixels.forEach(pixel => {
+      ctx.fillStyle = `rgb(0, 0, 0)`;
+      ctx.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
+    });
+  }
+  
+  function animate() {
+    updatePixels();
+    draw();
+    requestAnimationFrame(animate);
+  }
+  
+  // Démarrer l'animation
+  animate();
+</script>

@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
 
 interface Props {
 	title?: string;
@@ -19,6 +20,7 @@ const { title = 'Horde' } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body>
+		<BackgroundCanvas></BackgroundCanvas>
 		<Header></Header>
 		<span class="fixed h-full w-px top-0 left-4 bg-outline"></span>
 		<slot />
