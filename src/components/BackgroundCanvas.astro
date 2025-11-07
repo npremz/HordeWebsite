@@ -30,7 +30,7 @@
   function updatePixels() {
     const scrollY = window.scrollY;
     const viewportHeight = window.innerHeight;
-    const projectPos = getProjectSectionPosition();
+    const projectPos = getProjectSectionPosition() !+ 500;
     
     if (!projectPos) {
       pixels = [];
@@ -70,11 +70,14 @@
       }
     }
     
-    // Mélanger les positions disponibles
-    for (let i = availablePositions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [availablePositions[i], availablePositions[j]] = [availablePositions[j], availablePositions[i]];
-    }
+    // Trier les positions avec une pondération : priorité au bas mais avec aléatoire
+    availablePositions.sort((a, b) => {
+      // Calculer un score pondéré : Y (position verticale) + facteur aléatoire
+      const randomWeight = 200; // Ajuste la "dispersion" de l'effet
+      const scoreA = a.y - Math.random() * randomWeight;
+      const scoreB = b.y - Math.random() * randomWeight;
+      return scoreB - scoreA; // Tri descendant (bas en premier)
+    });
     
     // Ajouter les pixels manquants
     const pixelsToAdd = targetPixelCount - pixels.length;
