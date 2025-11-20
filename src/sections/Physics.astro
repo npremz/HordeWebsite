@@ -5,8 +5,8 @@ import DisplayText from '../components/DisplayText.astro';
 <section class="relative overflow-hidden">
 	<div id="bowl" class="relative border border-outline rounded-full h-svh mx-4 mt-6 bg-fond">
 		<div class="relative flex flex-col gap-5 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
-			<DisplayText tag='h2' class='mx-4'>Nous créons des interfaces soignées, façonnées pour donner forme à vos idées et les transfomer en expériences uniques.</DisplayText>
-			<p class="mx-4 text-center">( Appuyez & Faites glisser pour intéragir avec eux ↓ )</p>
+			<DisplayText tag='h2' class='mx-4 select-none'>Nous créons des interfaces soignées, façonnées pour donner forme à vos idées et les transfomer en expériences uniques.</DisplayText>
+			<p class="mx-4 text-center select-none">( Appuyez & Faites glisser pour intéragir avec eux ↓ )</p>
 		</div>
 		<div id="logo-letters" class="absolute inset-0">
 			<svg width="44" height="31" viewBox="0 0 44 31" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -97,6 +97,13 @@ import DisplayText from '../components/DisplayText.astro';
 	#logo-letters svg:active {
 		cursor: grabbing;
 	}
+
+	@media (max-width: 768px) {
+		#logo-letters svg {
+			pointer-events: none;
+			cursor: default;
+		}
+	}
 </style>
 
 <script>
@@ -107,6 +114,8 @@ import DisplayText from '../components/DisplayText.astro';
 	{
 		const initPhysics = () =>
 		{
+			// Détecter si on est sur mobile
+			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 			// Modules Matter.js
 			const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events } = Matter;
 
@@ -257,40 +266,33 @@ import DisplayText from '../components/DisplayText.astro';
 
 			Composite.add(world, letterBodies);
 
-			// Setup Mouse Constraint avec ajustement de position
-			const mouse = Mouse.create(logoContainer);
+			// Setup Mouse Constraint uniquement sur desktop
+			if (!isMobile) {
+				const mouse = Mouse.create(bowlElement);
 
-			// CRUCIAL : Ajuster la position de la souris pour correspondre au bowl
-			mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
-			mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+				// CRUCIAL : Ajuster la position de la souris pour correspondre au bowl
+				mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
+				mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
 
-			// Intercepter les événements de souris pour ajuster les coordonnées
-			const originalMousePosition = mouse.position;
-			bowlElement.addEventListener('mousemove', (e) =>
-			{
-				const rect = bowlElement.getBoundingClientRect();
-				mouse.position.x = e.clientX - rect.left;
-				mouse.position.y = e.clientY - rect.top;
-			});
-
-			bowlElement.addEventListener('mousedown', (e) =>
-			{
-				const rect = bowlElement.getBoundingClientRect();
-				mouse.position.x = e.clientX - rect.left;
-				mouse.position.y = e.clientY - rect.top;
-			});
-
-			const mouseConstraint = MouseConstraint.create(engine, {
-				mouse: mouse,
-				constraint: {
-					stiffness: 0.2,
-					render: {
-						visible: false
+				const mouseConstraint = MouseConstraint.create(engine, {
+					mouse: mouse,
+					constraint: {
+						stiffness: 0.2,
+						render: {
+							visible: false
+						}
 					}
-				}
-			});
+				});
 
-			Composite.add(world, mouseConstraint);
+				// Intercepter les événements pour ajuster les coordonnées
+				Events.on(mouseConstraint, 'mousemove', (event) => {
+					const rect = bowlElement.getBoundingClientRect();
+					mouse.position.x = event.mouse.position.x;
+					mouse.position.y = event.mouse.position.y;
+				});
+
+				Composite.add(world, mouseConstraint);
+			}
 
 			// Créer le runner
 			const runner = Runner.create();
