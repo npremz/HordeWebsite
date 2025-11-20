@@ -2,7 +2,7 @@
 
 ---
 
-<section id="projects" class="mt-48 ">
+<section id="projects" class="mt-48 flex flex-col gap-16">
   <div class="carousel-container w-screen overflow-hidden relative left-1/2 -translate-x-1/2 text-white">
     <div class="carousel-track">
       <span class="carousel-text">Tous Les Projets</span>
@@ -11,15 +11,15 @@
       <span class="carousel-text">Tous Les Projets</span>
     </div>
   </div>
-  <div>
+  <div class="relative z-10 flex flex-col gap-16">
 	<a href="#">
-		<img src="work1.jpg" alt="work 1">
+		<img class="max-w-[200px]" src="work1.jpg" alt="work 1">
 	</a>
 	<a href="#">
-		<img src="work2.jpg" alt="work 1">
+		<img class="max-w-[200px]" src="work2.jpg" alt="work 1">
 	</a>
 	<a href="#">
-		<img src="work3.jpg" alt="work 1">
+		<img class="max-w-[200px]" src="work3.jpg" alt="work 1">
 	</a>
   </div>
 </section>
@@ -31,7 +31,6 @@
 
   .carousel-track {
     display: flex;
-	padding: 2rem;
     gap: 2rem;
     animation: scroll 5s linear infinite;
     width: fit-content;
@@ -42,6 +41,7 @@
     font-size: 2.25rem;
     white-space: nowrap;
     font-weight: 200;
+	line-height: 1;
   }
 
   @keyframes scroll {
