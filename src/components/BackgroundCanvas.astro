@@ -30,19 +30,42 @@
   function updatePixels() {
     const scrollY = window.scrollY;
     const viewportHeight = window.innerHeight;
-    const projectPos = getProjectSectionPosition() !+ 500;
+    const projectPos = getProjectSectionPosition() + 500;
     
     if (!projectPos) {
       pixels = [];
       return;
     }
     
+    const projectSection = document.getElementById('projects');
+    if (!projectSection) {
+      pixels = [];
+      return;
+    }
+    
+    const projectRect = projectSection.getBoundingClientRect();
+    const projectEnd = projectRect.bottom + window.scrollY;
+    
     const triggerDistance = 500;
+    const triggerDistanceBottom = 500;
+    const bottomOffset = -300; // Offset pour remonter le point de déclenchement en bas (valeur négative = plus tôt)
     const distanceToProject = projectPos - (scrollY + viewportHeight);
     
-    const progress = Math.max(0, Math.min(1, 1 - distanceToProject / triggerDistance));
+    // Calculer la progression d'entrée (depuis le bas)
+    const progressIn = Math.max(0, Math.min(1, 1 - distanceToProject / triggerDistance));
     
-    if (progress === 0) {
+    // Calculer la progression de sortie (après la section)
+    const distanceAfterProject = scrollY - (projectEnd + bottomOffset);
+    const progressOut = Math.max(0, Math.min(1, distanceAfterProject / triggerDistanceBottom));
+    
+    // La progression finale combine entrée et sortie
+    const finalProgress = progressIn * (1 - progressOut);
+    
+    // Déterminer si on est en train de sortir par le haut (remontant) ou par le bas (descendant)
+    const isExitingTop = scrollY + viewportHeight < projectPos && progressIn < 1;
+    const isExitingBottom = scrollY > (projectEnd + bottomOffset);
+    
+    if (finalProgress === 0) {
       pixels = [];
       return;
     }
@@ -53,7 +76,7 @@
     const maxPixels = cols * rows;
     
     // À 100% de progression, on veut TOUS les pixels
-    const targetPixelCount = Math.floor(maxPixels * progress);
+    const targetPixelCount = Math.floor(maxPixels * finalProgress);
     
     // Créer un Set des positions déjà occupées
     const occupiedPositions = new Set(pixels.map(p => `${p.x},${p.y}`));
@@ -70,13 +93,20 @@
       }
     }
     
-    // Trier les positions avec une pondération : priorité au bas mais avec aléatoire
+    // Trier les positions avec une pondération : priorité selon la direction
     availablePositions.sort((a, b) => {
-      // Calculer un score pondéré : Y (position verticale) + facteur aléatoire
-      const randomWeight = 200; // Ajuste la "dispersion" de l'effet
-      const scoreA = a.y - Math.random() * randomWeight;
-      const scoreB = b.y - Math.random() * randomWeight;
-      return scoreB - scoreA; // Tri descendant (bas en premier)
+      const randomWeight = 200;
+      if (isExitingBottom) {
+        // Si on est après la section et qu'on remonte, apparaître depuis le haut
+        const scoreA = -a.y - Math.random() * randomWeight;
+        const scoreB = -b.y - Math.random() * randomWeight;
+        return scoreB - scoreA;
+      } else {
+        // Sinon apparaître depuis le bas (comportement normal)
+        const scoreA = a.y - Math.random() * randomWeight;
+        const scoreB = b.y - Math.random() * randomWeight;
+        return scoreB - scoreA;
+      }
     });
     
     // Ajouter les pixels manquants
@@ -90,6 +120,21 @@
         });
       }
     } else if (pixelsToAdd < 0) {
+      // Supprimer avec variation aléatoire selon la direction
+      pixels.sort((a, b) => {
+        const randomWeight = 200;
+        if (isExitingTop) {
+          // Supprimer depuis le haut (valeurs Y plus petites en premier)
+          const scoreA = -a.y + Math.random() * randomWeight;
+          const scoreB = -b.y + Math.random() * randomWeight;
+          return scoreA - scoreB;
+        } else {
+          // Supprimer depuis le bas (valeurs Y plus grandes en premier)
+          const scoreA = a.y + Math.random() * randomWeight;
+          const scoreB = b.y + Math.random() * randomWeight;
+          return scoreA - scoreB;
+        }
+      });
       pixels.length = targetPixelCount;
     }
   }
