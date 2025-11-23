@@ -14,15 +14,17 @@ const { class: className = '' } = Astro.props;
 	<div class="relative">
 		<!-- Mobile/Tablet: 2 elements (logo left, menu right) -->
 		<div class="flex justify-between items-center lg:hidden">
-			<svg width="37" height="13" viewBox="0 0 37 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<rect x="19.7373" y="2.51758" width="2.43499" height="10.0636"/>
-				<rect x="21.7637" y="5.0332" width="12.9866" height="2.51589"/>
-				<path d="M22.1753 2.51589C22.1753 1.1264 23.3017 0 24.6912 0H34.3502V2.51589H22.1753Z"/>
-				<rect x="34.3499" y="2.51758" width="2.43499" height="10.0636"/>
-				<path d="M0.00341797 0H2.43841V5.03178C1.0936 5.03178 0.00341797 3.9416 0.00341797 2.59679V0Z"/>
-				<path d="M14.6162 0H17.0512V2.59679C17.0512 3.9416 15.961 5.03178 14.6162 5.03178V0Z"/>
-				<path d="M17.0449 6.62793H17.0459V12.582H14.6104V7.55078H2.43555V12.582H0V5.03516H17.0449V6.62793Z"/>
-			</svg>
+			<a href="/">
+				<svg width="37" height="13" viewBox="0 0 37 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="19.7373" y="2.51758" width="2.43499" height="10.0636"/>
+					<rect x="21.7637" y="5.0332" width="12.9866" height="2.51589"/>
+					<path d="M22.1753 2.51589C22.1753 1.1264 23.3017 0 24.6912 0H34.3502V2.51589H22.1753Z"/>
+					<rect x="34.3499" y="2.51758" width="2.43499" height="10.0636"/>
+					<path d="M0.00341797 0H2.43841V5.03178C1.0936 5.03178 0.00341797 3.9416 0.00341797 2.59679V0Z"/>
+					<path d="M14.6162 0H17.0512V2.59679C17.0512 3.9416 15.961 5.03178 14.6162 5.03178V0Z"/>
+					<path d="M17.0449 6.62793H17.0459V12.582H14.6104V7.55078H2.43555V12.582H0V5.03516H17.0449V6.62793Z"/>
+				</svg>
+			</a>
 			<Wrapped padding='0.75rem' device='all' class='text-[0.875rem]'>
 				<button id="lang-toggle">
 					<span id="current-lang">Langues</span>
