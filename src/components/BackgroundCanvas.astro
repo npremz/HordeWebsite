@@ -2,7 +2,7 @@
 // Composant canvas d'arrière-plan avec effet de pixels progressifs
 ---
 
-<canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+<canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none -z-1000"></canvas>
 
 <script>
   const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
@@ -48,7 +48,7 @@
     
     const triggerDistance = 500;
     const triggerDistanceBottom = 500;
-    const bottomOffset = -300; // Offset pour remonter le point de déclenchement en bas (valeur négative = plus tôt)
+    const bottomOffset = -450; // Offset pour remonter le point de déclenchement en bas (valeur négative = plus tôt)
     const distanceToProject = projectPos - (scrollY + viewportHeight);
     
     // Calculer la progression d'entrée (depuis le bas)

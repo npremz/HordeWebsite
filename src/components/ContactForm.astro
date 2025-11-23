@@ -1,0 +1,80 @@
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<form id="contact-form" class=`${className} flex flex-col gap-8`>
+	<div class="flex flex-col gap-8">
+		<label for="name">1/ Votre nom & prénom *</label>
+		<input 
+			class="px-2.5 py-2.5 border border-labels
+			type="text" 
+			id="name" 
+			name="name" 
+			placeholder="Entrez votre nom complet" 
+			required 
+		/>
+	</div>
+
+	<div class="flex flex-col gap-8">
+		<label for="email">2/ Votre email *</label>
+		<input 
+			class="px-2.5 py-2.5 border border-labels"
+			type="email" 
+			id="email" 
+			name="email" 
+			placeholder="Entrez votre adresse email" 
+			required 
+		/>
+	</div>
+
+	<div class="flex flex-col gap-8">
+		<label for="message">3/ Rédigez votre demande *</label>
+		<textarea 
+			class="px-2.5 py-2.5 border border-labels"
+			id="message" 
+			name="message" 
+			placeholder="Votre message" 
+			required
+			rows="6"
+		></textarea>
+	</div>
+
+	<div class="form-field">
+		<label class="checkbox-label flex items-start">
+			<input
+				class="mt-1.5"
+				type="checkbox" 
+				id="marketing" 
+				name="marketing" 
+			/>
+			<span class="block pl-4">Je donne mon accord pour l'envoi de communications marketing.</span>
+		</label>
+	</div>
+
+	<button type="submit" class="px-2.5 py-2.5 bg-fond text-fonddark uppercase tracking-wider">Transmettre</button>
+</form>
+
+<script>
+	const form = document.getElementById('contact-form') as HTMLFormElement;
+
+	form?.addEventListener('submit', (e) => {
+		e.preventDefault();
+		
+		const formData = new FormData(form);
+		const data = {
+			name: formData.get('name'),
+			email: formData.get('email'),
+			message: formData.get('message'),
+			marketing: formData.get('marketing') === 'on'
+		};
+		
+		console.log('Form submitted:', data);
+		
+		// Ici tu pourras ajouter l'envoi vers ton backend
+		// fetch('/api/contact', { method: 'POST', body: JSON.stringify(data) })
+	});
+</script>

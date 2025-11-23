@@ -6,6 +6,8 @@ import Physics from '../sections/Physics.astro';
 import Services from '../sections/Services.astro';
 import Project from '../sections/Project.astro';
 import HorizontalLine from '../components/HorizontalLine.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout title="Horde - Home">
@@ -16,6 +18,9 @@ import HorizontalLine from '../components/HorizontalLine.astro';
 			<Physics></Physics>
             <Project></Project>
 			<Services></Services>
+            <HorizontalLine class="relative -mt-16 -z-10!"></HorizontalLine>
         </main>
+        <Footer></Footer>
     </Container>
+    <BackgroundCanvas></BackgroundCanvas>
 </Layout>

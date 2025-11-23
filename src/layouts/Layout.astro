@@ -5,9 +5,11 @@ import BackgroundCanvas from '../components/BackgroundCanvas.astro';
 
 interface Props {
 	title?: string;
+	theme?: 'light' | 'dark';
 }
 
-const { title = 'Horde' } = Astro.props;
+const { title = 'Horde', theme = 'light' } = Astro.props;
+const themeClass = theme === 'dark' ? 'bg-fonddark text-white [&_svg]:fill-white' : 'text-fonddark [&_svg]:fill-fonddark';
 ---
 
 <!doctype html>
@@ -19,11 +21,10 @@ const { title = 'Horde' } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
-		<BackgroundCanvas></BackgroundCanvas>
+	<body class={themeClass}>
 		<Header></Header>
-		<span class="fixed h-full w-px top-0 left-4 bg-outline"></span>
+		<span class=`fixed h-full w-px top-0 left-4 ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} -z-100`></span>
 		<slot />
-		<span class="fixed h-full w-px top-0 right-4 bg-outline"></span>
+		<span class=`fixed h-full w-px top-0 right-4 ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} -z-100`></span>
 	</body>
 </html>

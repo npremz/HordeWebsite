@@ -1,0 +1,28 @@
+---
+import Container from "../components/Container.astro";
+import Layout from "../layouts/Layout.astro";
+import Footer from '../components/Footer.astro';
+import Carousel from '../components/Carousel.astro';
+import Wrapped from "../components/Wrapped.astro";
+import HorizontalLine from '../components/HorizontalLine.astro';
+import ContactForm from "../components/ContactForm.astro";
+---
+
+<Layout title="Horde - Contact" theme="dark">
+	<Container>
+		<main>
+			<section class="relative h-halfscreen flex flex-col items-center">
+				<span class="absolute h-full w-circles border border-outlinedark -top-4 left-1/2 -translate-x-1/2 rounded-b-full"></span>
+
+				<Carousel text="Restons en contact" fontSize="2.25rem" class="top-1/2 -translate-y-1/2"></Carousel>
+				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24">
+					↓
+				</Wrapped>
+			</section>
+            <HorizontalLine class="mt-2" theme="dark"></HorizontalLine>
+			<ContactForm class="mx-4 mt-10"></ContactForm>
+            <HorizontalLine class="mt-12" theme="dark"></HorizontalLine>
+		</main>
+		<Footer class="mt-12"></Footer>
+	</Container>
+</Layout>

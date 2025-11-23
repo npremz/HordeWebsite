@@ -1,0 +1,55 @@
+---
+interface Props {
+	text: string;
+	textColor?: string;
+	speed?: number;
+	fontSize?: string;
+	class?: string;
+}
+
+const { 
+	text, 
+	textColor = 'text-white', 
+	speed = 5, 
+	fontSize = '2.25rem',
+	class: className = '' 
+} = Astro.props;
+---
+
+<div class={`carousel-container w-screen overflow-hidden relative left-1/2 -translate-x-1/2 ${textColor} ${className}`}>
+	<div class="carousel-track" style={`animation-duration: ${speed}s;`}>
+		<span class="carousel-text" style={`font-size: ${fontSize};`}>{text}</span>
+		<span class="carousel-text" style={`font-size: ${fontSize};`}>{text}</span>
+		<span class="carousel-text" style={`font-size: ${fontSize};`}>{text}</span>
+		<span class="carousel-text" style={`font-size: ${fontSize};`}>{text}</span>
+	</div>
+</div>
+
+<style>
+	.carousel-container {
+		position: relative;
+	}
+
+	.carousel-track {
+		display: flex;
+		gap: 2rem;
+		animation: scroll linear infinite;
+		width: fit-content;
+	}
+
+	.carousel-text {
+		font-family: var(--font-editorial);
+		white-space: nowrap;
+		font-weight: 200;
+		line-height: 1;
+	}
+
+	@keyframes scroll {
+		0% {
+			transform: translateX(0);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+</style>

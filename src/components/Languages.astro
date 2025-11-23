@@ -1,0 +1,39 @@
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div id="lang-dropdown" class=`hidden text-[0.875rem] ${className}`>
+	<button class="lang-option active" data-lang="fr">Français</button>
+	<button class="lang-option" data-lang="en">English</button>
+</div>
+
+<style>
+	.active{
+		position: relative;
+		text-decoration: none;
+		border-bottom: 1px solid;
+		display: inline-block;
+	}
+</style>
+
+<script>
+	const langOptions = document.querySelectorAll('.lang-option');
+	const langDropdown = document.getElementById('lang-dropdown');
+
+	langOptions.forEach(option => {
+		option.addEventListener('click', () => {
+			
+			langOptions.forEach(opt => opt.classList.remove('active'));
+			option.classList.add('active');
+			
+			langDropdown?.classList.add('hidden');
+			
+			console.log('Language changed to:', option.getAttribute('data-lang'));
+		});
+	});
+</script>
+
