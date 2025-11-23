@@ -1,12 +1,39 @@
 ---
-// Composant canvas d'arrière-plan avec effet de pixels progressifs
+interface Props {
+	targetId?: string;
+	topOffset?: number;
+	bottomOffset?: number;
+	triggerDistance?: number;
+	triggerDistanceBottom?: number;
+}
+
+const { 
+	targetId = 'projects',
+	topOffset = 500,
+	bottomOffset = -450,
+	triggerDistance = 500,
+	triggerDistanceBottom = 500
+} = Astro.props;
 ---
 
-<canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none -z-1000"></canvas>
+<canvas 
+	id="bg-canvas" 
+	class="fixed top-0 left-0 w-full h-full pointer-events-none -z-1000" 
+	data-target-id={targetId}
+	data-top-offset={topOffset}
+	data-bottom-offset={bottomOffset}
+	data-trigger-distance={triggerDistance}
+	data-trigger-distance-bottom={triggerDistanceBottom}
+></canvas>
 
 <script>
   const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d')!;
+  const targetId = canvas.getAttribute('data-target-id') || 'projects';
+  const topOffset = Number(canvas.getAttribute('data-top-offset')) || 500;
+  const bottomOffset = Number(canvas.getAttribute('data-bottom-offset')) || -450;
+  const triggerDistance = Number(canvas.getAttribute('data-trigger-distance')) || 500;
+  const triggerDistanceBottom = Number(canvas.getAttribute('data-trigger-distance-bottom')) || 500;
   
   let pixelSize = 20;
   let pixels: { x: number; y: number; alpha: number }[] = [];
@@ -20,7 +47,7 @@
   window.addEventListener('resize', resizeCanvas);
   
   function getProjectSectionPosition(): number | null {
-    const projectSection = document.getElementById('projects');
+    const projectSection = document.getElementById(targetId);
     if (!projectSection) return null;
     
     const rect = projectSection.getBoundingClientRect();
@@ -30,14 +57,14 @@
   function updatePixels() {
     const scrollY = window.scrollY;
     const viewportHeight = window.innerHeight;
-    const projectPos = getProjectSectionPosition() + 500;
+    const projectPos = getProjectSectionPosition() + topOffset;
     
     if (!projectPos) {
       pixels = [];
       return;
     }
     
-    const projectSection = document.getElementById('projects');
+    const projectSection = document.getElementById(targetId);
     if (!projectSection) {
       pixels = [];
       return;
@@ -46,9 +73,6 @@
     const projectRect = projectSection.getBoundingClientRect();
     const projectEnd = projectRect.bottom + window.scrollY;
     
-    const triggerDistance = 500;
-    const triggerDistanceBottom = 500;
-    const bottomOffset = -450; // Offset pour remonter le point de déclenchement en bas (valeur négative = plus tôt)
     const distanceToProject = projectPos - (scrollY + viewportHeight);
     
     // Calculer la progression d'entrée (depuis le bas)

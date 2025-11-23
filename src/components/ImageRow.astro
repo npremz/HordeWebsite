@@ -1,0 +1,13 @@
+---
+interface Props {
+	span?: 1 | 2;
+	class?: string;
+}
+
+const { span = 1, class: className = '' } = Astro.props;
+const spanClass = span === 2 ? 'col-span-2' : 'col-span-1';
+---
+
+<div class={`${spanClass} ${className}`}>
+	<slot />
+</div>

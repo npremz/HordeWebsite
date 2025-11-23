@@ -1,3 +1,94 @@
 ---
-
+import Container from "../../components/Container.astro";
+import Layout from "../../layouts/Layout.astro";
+import Footer from '../../components/Footer.astro';
+import Carousel from '../../components/Carousel.astro';
+import Wrapped from "../../components/Wrapped.astro";
+import HorizontalLine from '../../components/HorizontalLine.astro';
+import ImageContainer from '../../components/ImageContainer.astro';
+import ImageRow from '../../components/ImageRow.astro';
+import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 ---
+<Layout title="Horde - Contact">
+	<Container>
+		<main>
+			<section class="relative mx-4">
+				<Carousel class="mt-24" text="Étude de cas (Café Belga - Projet fictif)" speed={20} textColor="#010101"></Carousel>
+				<div class="my-10 flex flex-col gap-10">
+					<p class="leading-loose">Nous avons travaillé dans un projet fictif qui était de créer un site web du Café Belga qui serait bien plus qu'un simple site vitrine en ligne: un point de contact stratégique conçu pour transmettre les valeurs, l'esthétique et la vision de la marque. La conception UX/UI a mis l'accent sur la simplicité, la réactivité et la cohérence visuelle. Construite sur React, la plateforme comprend des fonctionnalités avancées permettant de gérer un système de réservation, les dates des prochains évenements et la carte des différents produits du Café Belga.</p>
+					<div class="flex justify-between">
+						<a target="_blank" href="https://belga.nicolas-premont.be">
+							<Wrapped device="all">
+								Voir le projet →
+							</Wrapped>
+						</a>
+						<Wrapped device="all">↓</Wrapped>
+					</div>
+				</div>
+				<HorizontalLine class="mt-2"></HorizontalLine>
+				<ImageContainer class="gap-4 -mt-px">
+					<ImageRow span={2}>
+						<img src="../belga1.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga2.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga3.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga4.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga5.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga6.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga7.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga8.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga9.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga10.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga11.jpg" alt="">
+					</ImageRow>
+				</ImageContainer>
+				<div class="mt-10 flex flex-col gap-10">
+					<h3 class="uppercase leading-0">Type de projet</h3>
+					<ul class="leading-none flex flex-col gap-3">
+						<li>Web Design</li>
+						<li>ReactJS</li>
+						<li>Animation CSS</li>
+						<li>Conception UI & UX</li>
+					</ul>
+					<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7.9645 24.0664C12.3639 24.0664 15.9304 27.6328 15.9304 32.0322L7.9645 32.0322L7.9645 24.0664Z" fill="#101010"/>
+						<path d="M31.8663 24.0664C27.4669 24.0664 23.9004 27.6328 23.9004 32.0322L31.8663 32.0322L31.8663 24.0664Z" fill="#101010"/>
+						<rect y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+						<rect x="15.9304" width="7.96592" height="7.96579" fill="#101010"/>
+						<path d="M7.96533 8.13281H15.9313C15.9313 12.5322 12.3647 16.0986 7.96533 16.0986L7.96533 8.13281Z" fill="#101010"/>
+						<rect x="15.9304" y="32.0352" width="7.96592" height="7.96579" fill="#101010"/>
+						<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+						<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
+					</svg>
+					<button class="px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider">Voir tout les projets</button>
+				</div>
+			</section>
+			<HorizontalLine class="mt-10"></HorizontalLine>
+		</main>
+		<Footer class="mt-12"></Footer>
+	</Container>
+    <BackgroundCanvas 
+		targetId="imgContainer"
+		topOffset={800}
+		bottomOffset={-800}
+	></BackgroundCanvas>
+</Layout>
