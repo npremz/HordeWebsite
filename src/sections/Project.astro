@@ -2,18 +2,17 @@
 import Carousel from '../components/Carousel.astro';
 ---
 
-<section id="projects" class="my-60 flex flex-col gap-16">
-  <Carousel text="Tous Les Projets"/>
-  <div class="relative z-10 flex flex-col items-center gap-16">
-	<a href="#">
-		<img class="max-w-[200px]" src="work1.jpg" alt="work 1">
-	</a>
-	<a href="#">
-		<img class="max-w-[200px]" src="work2.jpg" alt="work 1">
-	</a>
-	<a href="#">
-		<img class="max-w-[200px]" src="work3.jpg" alt="work 1">
-	</a>
-  </div>
+<section id="projects" class="my-60 flex flex-col gap-16 mx-(--line-margin) sm:gap-24">
+	<Carousel text="Tous Les Projets" class='text-[2.25rem] sm:text-[3.25rem]'/>
+	<div class="relative z-10 flex flex-col items-center gap-16 w-full sm:grid sm:grid-cols-3 sm:items-start">
+		<a href="#" class="sm:max-w-full sm:justify-self-end">
+			<img class="max-w-[200px] sm:max-w-full" src="work1.jpg" alt="work 1">
+		</a>
+		<a href="#" class="sm:max-w-full sm:justify-self-center sm:mt-16">
+			<img class="max-w-[200px] sm:max-w-full" src="work2.jpg" alt="work 2">
+		</a>
+		<a href="#" class="sm:max-w-full sm:justify-self-start">
+			<img class="max-w-[200px] sm:max-w-full" src="work3.jpg" alt="work 3">
+		</a>
+	</div>
 </section>
-

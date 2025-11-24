@@ -23,8 +23,8 @@ const themeClass = theme === 'dark' ? 'bg-fonddark text-white [&_svg]:fill-white
 	</head>
 	<body class={themeClass}>
 		<Header></Header>
-		<span class=`fixed h-full w-px top-0 left-4 ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} -z-10000`></span>
+		<span class=`fixed h-full w-px md:w-10 md:border-x top-0 left-(--line-margin) ${theme === 'dark' ? 'bg-outlinedark md:border-outlinedark' : 'bg-outline md:border-outline'} md:bg-transparent -z-10000`></span>
 		<slot />
-		<span class=`fixed h-full w-px top-0 right-4 ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} -z-10000`></span>
+		<span class=`fixed h-full w-px md:w-10 md:border-x top-0 right-(--line-margin) ${theme === 'dark' ? 'bg-outlinedark md:border-outlinedark' : 'bg-outline md:border-outline'} md:bg-transparent -z-10000`></span>
 	</body>
 </html>

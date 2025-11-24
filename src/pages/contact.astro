@@ -14,13 +14,13 @@ import ContactForm from "../components/ContactForm.astro";
 			<section class="relative h-halfscreen flex flex-col items-center">
 				<span class="absolute h-full w-circles border border-outlinedark -top-4 left-1/2 -translate-x-1/2 rounded-b-full"></span>
 
-				<Carousel text="Restons en contact" fontSize="2.25rem" class="top-1/2 -translate-y-1/2"></Carousel>
+				<Carousel text="Restons en contact" class="top-1/2 -translate-y-1/2 text-[2.25rem] sm:text-[3.25rem]"></Carousel>
 				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24">
 					↓
 				</Wrapped>
 			</section>
             <HorizontalLine class="mt-2" theme="dark"></HorizontalLine>
-			<ContactForm class="mx-4 mt-10"></ContactForm>
+			<ContactForm class="mx-(--line-margin) mt-10"></ContactForm>
             <HorizontalLine class="mt-12" theme="dark"></HorizontalLine>
 		</main>
 		<Footer class="mt-12"></Footer>

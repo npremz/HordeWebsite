@@ -12,9 +12,9 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 <Layout title="Horde - Contact">
 	<Container>
 		<main>
-			<section class="relative mx-4">
-				<Carousel class="mt-24" text="Étude de cas (Café Belga - Projet fictif)" speed={20} textColor="#010101"></Carousel>
-				<div class="my-10 flex flex-col gap-10">
+			<section class="relative mx-(--line-margin)">
+				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem]" text="Étude de cas (Café Belga - Projet fictif)" speed={20} textColor="#010101"></Carousel>
+				<div class="my-10 flex flex-col gap-10 sm:mt-44 sm:mb-20 sm:gap-20">
 					<p class="leading-loose">Nous avons travaillé dans un projet fictif qui était de créer un site web du Café Belga qui serait bien plus qu'un simple site vitrine en ligne: un point de contact stratégique conçu pour transmettre les valeurs, l'esthétique et la vision de la marque. La conception UX/UI a mis l'accent sur la simplicité, la réactivité et la cohérence visuelle. Construite sur React, la plateforme comprend des fonctionnalités avancées permettant de gérer un système de réservation, les dates des prochains évenements et la carte des différents produits du Café Belga.</p>
 					<div class="flex justify-between">
 						<a target="_blank" href="https://belga.nicolas-premont.be">
@@ -61,30 +61,32 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 						<img src="../belga11.jpg" alt="">
 					</ImageRow>
 				</ImageContainer>
-				<div class="mt-10 flex flex-col gap-10">
-					<h3 class="uppercase leading-0">Type de projet</h3>
+				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16">
+					<h3 class="uppercase leading-none">Type de projet</h3>
 					<ul class="leading-none flex flex-col gap-3">
 						<li>Web Design</li>
 						<li>ReactJS</li>
 						<li>Animation CSS</li>
 						<li>Conception UI & UX</li>
 					</ul>
-					<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7.9645 24.0664C12.3639 24.0664 15.9304 27.6328 15.9304 32.0322L7.9645 32.0322L7.9645 24.0664Z" fill="#101010"/>
-						<path d="M31.8663 24.0664C27.4669 24.0664 23.9004 27.6328 23.9004 32.0322L31.8663 32.0322L31.8663 24.0664Z" fill="#101010"/>
-						<rect y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
-						<rect x="15.9304" width="7.96592" height="7.96579" fill="#101010"/>
-						<path d="M7.96533 8.13281H15.9313C15.9313 12.5322 12.3647 16.0986 7.96533 16.0986L7.96533 8.13281Z" fill="#101010"/>
-						<rect x="15.9304" y="32.0352" width="7.96592" height="7.96579" fill="#101010"/>
-						<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
-						<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
-					</svg>
-					<button class="px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider">Voir tout les projets</button>
+					<div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-center sm:justify-between">
+						<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.9645 24.0664C12.3639 24.0664 15.9304 27.6328 15.9304 32.0322L7.9645 32.0322L7.9645 24.0664Z" fill="#101010"/>
+							<path d="M31.8663 24.0664C27.4669 24.0664 23.9004 27.6328 23.9004 32.0322L31.8663 32.0322L31.8663 24.0664Z" fill="#101010"/>
+							<rect y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="15.9304" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M7.96533 8.13281H15.9313C15.9313 12.5322 12.3647 16.0986 7.96533 16.0986L7.96533 8.13281Z" fill="#101010"/>
+							<rect x="15.9304" y="32.0352" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
+						</svg>
+						<button class="px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider sm:px-10 sm:py-4 sm:w-fit">Voir tout les projets</button>
+					</div>
 				</div>
 			</section>
-			<HorizontalLine class="mt-10"></HorizontalLine>
+			<HorizontalLine class="mt-10 sm:mt-16"></HorizontalLine>
 		</main>
-		<Footer class="mt-12"></Footer>
+		<Footer class="mt-12 sm:mt-16"></Footer>
 	</Container>
     <BackgroundCanvas 
 		targetId="imgContainer"
