@@ -7,7 +7,7 @@ interface Props {
 const { tag: Tag = 'h1', class: className = '' } = Astro.props;
 ---
 
-<div class=`relative sm:flex sm:items-center sm:gap-8 ${className}`>
+<div class=`relative sm:flex sm:items-center sm:gap-8 ${className} md:max-w-[705px]`>
 	<span class="quote-before absolute left-0 -top-5 sm:static sm:mr-(--line-margin)">
 		<svg class="sm:hidden" width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<path d="M7.20657 2.42398L9.60328 2.42398C9.60328 3.74766 10.6763 4.83185 12 4.83185L12 9.66406L7.20657 9.66406L7.20657 2.42398ZM-3.20727e-07 2.42398L2.39672 2.42398C2.39672 3.75381 3.48002 4.83185 4.80985 4.83185L4.80985 9.66406L-9.53674e-07 9.66406L-3.20727e-07 2.42398ZM9.60328 -0.000368328L12 -0.000368118L12 2.42399L9.60328 2.42398L9.60328 -0.000368328ZM2.39672 -0.000368958L4.80985 -0.000368747L4.80985 2.42398L2.39672 2.42398L2.39672 -0.000368958Z" fill="#101010"/>

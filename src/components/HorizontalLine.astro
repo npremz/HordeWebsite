@@ -9,11 +9,11 @@ const { class: className = '', theme: theme = 'light' } = Astro.props;
 
 <div class=`relative w-screen left-1/2 -translate-1/2 -z-9999 ${className}`>
 	<div class=`w-full h-px ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'}`></div>
-	<svg class="absolute top-0 -translate-1/2 left-(--line-margin) ml-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
+	<svg class="absolute top-0 -translate-1/2 left-(--line-margin) md:left-[calc(2*var(--line-margin))] ml-px md:-ml-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
 		<rect width="7" height="7" fill=`${theme === 'dark' ? '#f1f1f1' : '#101010'}`/>
 	</svg>
 
-	<svg class="absolute top-0 -translate-y-1/2 translate-x-1/2 right-(--line-margin) mr-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
+	<svg class="absolute top-0 -translate-y-1/2 translate-x-1/2 right-(--line-margin) md:right-[calc(2*var(--line-margin))] mr-px md:-mr-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
 		<rect width="7" height="7" fill=`${theme === 'dark' ? '#f1f1f1' : '#101010'}`/>
 	</svg>
 </div>
