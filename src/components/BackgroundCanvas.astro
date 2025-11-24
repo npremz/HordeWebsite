@@ -34,13 +34,29 @@ const {
   const bottomOffset = Number(canvas.getAttribute('data-bottom-offset')) || -450;
   const triggerDistance = Number(canvas.getAttribute('data-trigger-distance')) || 500;
   const triggerDistanceBottom = Number(canvas.getAttribute('data-trigger-distance-bottom')) || 500;
+
+  let animationId: number | null = null;
+  let resizeTimeout: number | undefined;
   
-  let pixelSize = 20;
   let pixels: { x: number; y: number; alpha: number }[] = [];
+
+  function getPixelSize(): number
+  {
+	const width = window.innerWidth;
+	
+	if (width < 640) return 15; // Mobile
+	if (width < 1024) return 25; // Tablette
+	if (width < 1920) return 40; // Tablette
+	if (width < 2560) return 50; // Tablette
+	return 65; // Desktop
+  }
+
+  let pixelSize = 20;
   
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+	pixelSize = getPixelSize();
   }
   
   resizeCanvas();
@@ -178,6 +194,17 @@ const {
     requestAnimationFrame(animate);
   }
   
+	window.addEventListener('resize', () =>
+	{
+		clearTimeout(resizeTimeout);
+		
+		resizeTimeout = setTimeout(() =>
+		{
+			pixels = [];
+			resizeCanvas();
+		}, 200);
+	});
+
   // Démarrer l'animation
   animate();
 </script>
