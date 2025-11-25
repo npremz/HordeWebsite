@@ -6,11 +6,11 @@ interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<form id="contact-form" class=`${className} flex flex-col gap-8`>
+<form id="contact-form" class=`${className} flex flex-col gap-8 md:gap-16`>
 	<div class="flex flex-col gap-8">
 		<label for="name">1/ Votre nom & prénom *</label>
 		<input 
-			class="px-2.5 py-2.5 border border-labels
+			class="px-2.5 py-2.5 border border-labels"
 			type="text" 
 			id="name" 
 			name="name" 
@@ -43,19 +43,21 @@ const { class: className = '' } = Astro.props;
 		></textarea>
 	</div>
 
-	<div class="form-field">
-		<label class="checkbox-label flex items-start">
-			<input
-				class="mt-1.5"
-				type="checkbox" 
-				id="marketing" 
-				name="marketing" 
-			/>
-			<span class="block pl-4">Je donne mon accord pour l'envoi de communications marketing.</span>
-		</label>
+	<div class="flex flex-col gap-8 ">
+		<div class="form-field">
+			<label class="checkbox-label flex items-start">
+				<input
+					class="mt-1.5"
+					type="checkbox" 
+					id="marketing" 
+					name="marketing" 
+				/>
+				<span class="block pl-4">Je donne mon accord pour l'envoi de communications marketing.</span>
+			</label>
+		</div>
+		
+		<button type="submit" class="px-2.5 py-2.5 bg-fond text-fonddark uppercase tracking-wider">Transmettre</button>
 	</div>
-
-	<button type="submit" class="px-2.5 py-2.5 bg-fond text-fonddark uppercase tracking-wider">Transmettre</button>
 </form>
 
 <script>
