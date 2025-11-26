@@ -1,6 +1,7 @@
 ---
 import DisplayText from '../components/DisplayText.astro';
 import Wrapped from '../components/Wrapped.astro';
+import Weather from '../components/Weather.astro';
 ---
 
 <section class='relative h-svh flex flex-col justify-between before:content-[""] before:mt-8 md:items-center'>
@@ -8,9 +9,9 @@ import Wrapped from '../components/Wrapped.astro';
 	<DisplayText class='mx-[calc(2*var(--line-margin))]' tag='h2'>
 		Studio horizontal bruxellois, nous cultivons une structure à taille humaine pour être au plus près des besoins de nos clients.
 	</DisplayText>
-	<div class="flex flex-col gap-8 items-center mb-20 sm:gap-12 md:w-full">
-		<h1 class="relative w-full z-10">
-			<svg class="w-full" viewBox="0 0 290 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<div class="flex flex-col gap-8 items-center mb-20 sm:gap-12 md:w-full lg:gap-20 xl:gap-36">
+		<h1 class="relative w-full z-10 lg:flex lg:flex-col lg:items-center">
+			<svg class="w-full lg:max-w-[85%]" viewBox="0 0 290 68" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M228.321 43.0708C228.321 39.663 231.084 36.9004 234.491 36.9004H265.343V43.0708H228.321Z" fill="#101010"/>
 				<rect x="227.908" y="49.2402" width="37.4336" height="6.17037" fill="#101010"/>
 				<rect x="222.15" y="43.0723" width="6.17037" height="18.5111" fill="#101010"/>
@@ -54,8 +55,12 @@ import Wrapped from '../components/Wrapped.astro';
 			</svg>
 			<span class="hidden-trick">Agence Horde</span>
 		</h1>
-		<Wrapped device='all' padding='0.625rem'>
-			↓
-		</Wrapped>
+		<div class="lg:grid grid-cols-3 items-center lg:w-[calc(100%+2*var(--line-margin))] xl:w-[calc(100%+4*var(--line-margin))]">
+			<Weather class="hidden lg:flex lg:justify-self-start"></Weather>
+			<Wrapped device='all' padding='0.625rem' class='lg:justify-self-center'>
+				↓
+			</Wrapped>
+			<p class="hidden lg:block lg:justify-self-end">Agence Numerique Créative</p>
+		</div>
 	</div>
 </section>

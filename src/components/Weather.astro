@@ -1,0 +1,113 @@
+---
+import Wrapped from './Wrapped.astro';
+
+interface Props
+{
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`flex items-center gap-1.5 w-full ${className}`}>
+	<div id="time-display" class="whitespace-nowrap ">Day --:--:--</div>
+	<Wrapped device="all" padding="0.25rem">
+		<div id="weather-display" class="whitespace-nowrap">Chargement...</div>
+	</Wrapped>
+</div>
+
+<script>
+	// Configuration
+	const LAT = 50.8503;
+	const LON = 4.3517;
+	
+	const weatherCodes: Record<number, [string, string]> = {
+		0: ['Ensoleillé', '☀️'],
+		1: ['Partiellement nuageux', '⛅'],
+		2: ['Nuageux', '☁️'],
+		3: ['Couvert', '☁️'],
+		45: ['Brouillard', '🌫️'],
+		48: ['Brouillard givrant', '🌫️'],
+		51: ['Bruine légère', '🌧️'],
+		53: ['Bruine', '🌧️'],
+		55: ['Bruine intense', '🌧️'],
+		61: ['Pluie faible', '🌧️'],
+		63: ['Pluie', '🌧️'],
+		65: ['Pluie forte', '🌧️'],
+		71: ['Neige faible', '❄️'],
+		73: ['Neige', '❄️'],
+		75: ['Neige forte', '❄️'],
+		77: ['Grésil', '❄️'],
+		80: ['Averses', '🌦️'],
+		81: ['Averses modérées', '🌦️'],
+		82: ['Violentes averses', '⛈️'],
+		95: ['Orage', '⚡'],
+		96: ['Orage et grêle', '⛈️'],
+		99: ['Orage violent', '⛈️']
+	};
+
+	const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+	let currentWeatherText = 'Chargement...';
+
+	function formatTime(date: Date): string
+	{
+		const dayName = days[date.getDay()];
+		const hours = date.getHours().toString().padStart(2, '0');
+		const minutes = date.getMinutes().toString().padStart(2, '0');
+		const seconds = date.getSeconds().toString().padStart(2, '0');
+
+		return `${dayName} ${hours}:${minutes}:${seconds}`;
+	}
+
+	async function fetchWeather()
+	{
+		try
+		{
+			const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`);
+			const data = await response.json();
+			
+			const code = data.current_weather.weathercode;
+			const weatherInfo = weatherCodes[code] || ['Indisponible', ''];
+			
+			// On prépare juste la string "Ensoleillé ☀️"
+			currentWeatherText = `${weatherInfo[0]} ${weatherInfo[1]}`;
+		}
+		catch (error)
+		{
+			console.error("Erreur météo:", error);
+			currentWeatherText = "Indisponible";
+		}
+		
+		// Mise à jour immédiate du texte météo après le fetch
+		const weatherEl = document.getElementById('weather-display');
+		if (weatherEl)
+		{
+			weatherEl.innerText = currentWeatherText;
+		}
+	}
+
+	function updateTime()
+	{
+		const timeEl = document.getElementById('time-display');
+		if (timeEl)
+		{
+			const now = new Date();
+			timeEl.innerText = formatTime(now);
+		}
+	}
+
+	function init()
+	{
+		fetchWeather();
+		updateTime();
+		
+		// Horloge : toutes les secondes
+		setInterval(updateTime, 1000);
+		
+		// Météo : toutes les 15 minutes
+		setInterval(fetchWeather, 1000 * 60 * 15);
+	}
+
+	init();
+</script>

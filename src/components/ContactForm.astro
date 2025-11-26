@@ -6,7 +6,7 @@ interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<form id="contact-form" class=`${className} flex flex-col gap-8 md:gap-16`>
+<form id="contact-form" class=`${className} flex flex-col gap-8 md:gap-16 lg:max-w-[1100px]`>
 	<div class="flex flex-col gap-8">
 		<label for="name">1/ Votre nom & prénom *</label>
 		<input 
@@ -43,7 +43,7 @@ const { class: className = '' } = Astro.props;
 		></textarea>
 	</div>
 
-	<div class="flex flex-col gap-8 ">
+	<div class="flex flex-col gap-8 lg:flex-row lg:justify-between">
 		<div class="form-field">
 			<label class="checkbox-label flex items-start">
 				<input
@@ -56,7 +56,7 @@ const { class: className = '' } = Astro.props;
 			</label>
 		</div>
 		
-		<button type="submit" class="px-2.5 py-2.5 bg-fond text-fonddark uppercase tracking-wider">Transmettre</button>
+		<button type="submit" class="leading-none px-2.5 py-4 bg-fond text-fonddark uppercase tracking-wider lg:px-10 lg:py-6 ">Transmettre</button>
 	</div>
 </form>
 

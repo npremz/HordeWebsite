@@ -3,8 +3,8 @@ import DisplayText from '../components/DisplayText.astro';
 ---
 
 <section class="relative overflow-hidden">
-	<div id="bowl" class="relative border border-outline rounded-full h-svh mx-(--line-margin) mt-[calc(2px+var(--line-margin))] bg-fond">
-		<div class="relative flex flex-col gap-5 top-1/2 -translate-y-1/2 z-10 pointer-events-none md:items-center">
+	<div id="bowl" class="relative border border-outline rounded-full h-svh mx-(--line-margin) mt-[calc(2px+var(--line-margin))] bg-fond lg:h-auto lg:aspect-square lg:max-w-[calc(100%-2*var(--line-margin))]">
+		<div class="relative flex flex-col gap-5 top-1/2 -translate-y-1/2 z-10 pointer-events-none md:items-center lg:gap-10">
 			<DisplayText tag='h2' class='mx-4 select-none'>Nous créons des interfaces soignées, façonnées pour donner forme à vos idées et les transfomer en expériences uniques.</DisplayText>
 			<p class="mx-4 text-center select-none">( Appuyez & Faites glisser pour intéragir avec eux ↓ )</p>
 		</div>
@@ -262,6 +262,7 @@ import DisplayText from '../components/DisplayText.astro';
 				// On utilise 'mousedown' et 'touchstart' pour réagir immédiatement
 				svg.addEventListener('mousedown', enableDragMode);
 				svg.addEventListener('touchstart', enableDragMode, { passive: true });
+
 			});
 
 			window.addEventListener('mouseup', disableDragModeGlobal);

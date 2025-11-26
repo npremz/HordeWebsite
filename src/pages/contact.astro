@@ -11,16 +11,16 @@ import ContactForm from "../components/ContactForm.astro";
 <Layout title="Horde - Contact" theme="dark">
 	<Container>
 		<main>
-			<section class="relative h-halfscreen flex flex-col items-center">
-				<span class="absolute h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full"></span>
+			<section class="relative h-halfscreen flex flex-col items-center xl:h-[70svh]">
+				<span class="absolute h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
 
-				<Carousel text="Restons en contact" class="top-1/2 -translate-y-1/2 text-[2.25rem] sm:text-[3.25rem]"></Carousel>
-				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24 md:-translate-y-28">
+				<Carousel text="Restons en contact" class="top-1/2 -translate-y-1/2 text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]"></Carousel>
+				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24 md:-translate-y-28 lg:-translate-y-32">
 					↓
 				</Wrapped>
 			</section>
             <HorizontalLine class="mt-2" theme="dark"></HorizontalLine>
-			<ContactForm class="mx-(--line-margin) mt-10 md:mt-20"></ContactForm>
+			<ContactForm class="mx-(--line-margin) mt-10 md:mt-20 lg:relative lg:left-1/2 lg:-translate-x-1/2 lg:mx-0 lg:my-44"></ContactForm>
             <HorizontalLine class="mt-12 md:mt-20" theme="dark"></HorizontalLine>
 		</main>
 		<Footer class="mt-12 md:mt-20"></Footer>

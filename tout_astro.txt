@@ -1,0 +1,2288 @@
+
+===== ./node_modules/@astrojs/prism/Prism.astro =====
+---
+import { runHighlighterWithAstro } from './dist/highlighter';
+
+interface Props {
+	class?: string;
+	lang?: string;
+	code: string;
+}
+
+const { class: className, lang, code } = Astro.props as Props;
+const { classLanguage, html } = runHighlighterWithAstro(lang, code);
+---
+
+<pre
+	class={[className, classLanguage]
+		.filter(Boolean)
+		.join(' ')}><code class={classLanguage} set:html={html} /></pre>
+
+===== ./node_modules/.astro =====
+
+===== ./node_modules/astro/components/Image.astro =====
+---
+import { getImage, imageConfig, type LocalImageProps, type RemoteImageProps } from 'astro:assets';
+import type { UnresolvedImageTransform } from '../dist/assets/types';
+import { AstroError, AstroErrorData } from '../dist/core/errors/index.js';
+import type { HTMLAttributes } from '../types';
+
+// The TypeScript diagnostic for JSX props uses the last member of the union to suggest props, so it would be better for
+// LocalImageProps to be last. Unfortunately, when we do this the error messages that remote images get are complete nonsense
+// Not 100% sure how to fix this, seems to be a TypeScript issue. Unfortunate.
+type Props = LocalImageProps | RemoteImageProps;
+
+const props = Astro.props;
+
+if (props.alt === undefined || props.alt === null) {
+	throw new AstroError(AstroErrorData.ImageMissingAlt);
+}
+
+// As a convenience, allow width and height to be string with a number in them, to match HTML's native `img`.
+if (typeof props.width === 'string') {
+	props.width = parseInt(props.width);
+}
+
+if (typeof props.height === 'string') {
+	props.height = parseInt(props.height);
+}
+
+const layout = props.layout ?? imageConfig.layout ?? 'none';
+
+if (layout !== 'none') {
+	// Apply defaults from imageConfig if not provided
+	props.layout ??= imageConfig.layout;
+	props.fit ??= imageConfig.objectFit ?? 'cover';
+	props.position ??= imageConfig.objectPosition ?? 'center';
+}
+
+const image = await getImage(props as UnresolvedImageTransform);
+
+const additionalAttributes: HTMLAttributes<'img'> = {};
+if (image.srcSet.values.length > 0) {
+	additionalAttributes.srcset = image.srcSet.attribute;
+}
+
+if (import.meta.env.DEV) {
+	additionalAttributes['data-image-component'] = 'true';
+}
+
+const { class: className, ...attributes } = { ...additionalAttributes, ...image.attributes };
+---
+
+{/* Applying class outside of the spread prevents it from applying unnecessary astro-* classes */}
+<img src={image.src} {...attributes} class={className} />
+
+===== ./node_modules/astro/components/Code.astro =====
+---
+import type { ThemePresets } from '@astrojs/markdown-remark';
+import type { ShikiTransformer, ThemeRegistration, ThemeRegistrationRaw } from 'shiki';
+import { bundledLanguages } from 'shiki/langs';
+import { getCachedHighlighter } from '../dist/core/shiki.js';
+import type { CodeLanguage } from '../dist/types/public';
+import type { HTMLAttributes } from '../types';
+
+interface Props extends Omit<HTMLAttributes<'pre'>, 'lang'> {
+	/** The code to highlight. Required. */
+	code: string;
+	/**
+	 * The language of your code.
+	 * Supports all languages listed here: https://shiki.style/languages
+	 * Instructions for loading a custom language: https://shiki.style/guide/load-lang
+	 *
+	 * @default "plaintext"
+	 */
+	lang?: CodeLanguage;
+	/**
+	 * A metastring to pass to the highlighter.
+	 * Allows passing information to transformers: https://shiki.style/guide/transformers#meta
+	 *
+	 * @default undefined
+	 */
+	meta?: string;
+	/**
+	 * The styling theme.
+	 * Supports all themes listed here: https://shiki.style/themes
+	 * Instructions for loading a custom theme: https://shiki.style/guide/load-theme
+	 *
+	 * @default "github-dark"
+	 */
+	theme?: ThemePresets | ThemeRegistration | ThemeRegistrationRaw;
+	/**
+	 * Multiple themes to style with -- alternative to "theme" option.
+	 * Supports all themes found above; see https://shiki.style/guide/dual-themes for more information.
+	 */
+	themes?: Record<string, ThemePresets | ThemeRegistration | ThemeRegistrationRaw>;
+	/**
+	 * Chooses a theme from the "themes" option that you've defined as the default styling theme.
+	 *  - <string>: one of the keys defined in the "themes" option. Will throw an error if the key is not defined.
+	 *  - false: disabled. You'll have to apply the styling theme yourself. No effect if the "themes" option is not set.
+	 *
+	 * See https://shiki.style/guide/dual-themes#without-default-color for more information.
+	 *
+	 * @default "light"
+	 */
+	defaultColor?: 'light' | 'dark' | string | false;
+	/**
+	 * Enable word wrapping.
+	 *  - true: enabled.
+	 *  - false: disabled.
+	 *  - null: All overflow styling removed. Code will overflow the element by default.
+	 *
+	 * @default false
+	 */
+	wrap?: boolean | null;
+	/**
+	 * Generate inline code element only, without the pre element wrapper.
+	 *
+	 * @default false
+	 */
+	inline?: boolean;
+	/**
+	 * Shiki transformers to customize the generated HTML by manipulating the hast tree.
+	 * Supports all transformers listed here: https://shiki.style/packages/transformers#transformers
+	 * Instructions for custom transformers: https://shiki.style/guide/transformers
+	 */
+	transformers?: ShikiTransformer[];
+}
+
+const {
+	code,
+	lang = 'plaintext',
+	meta,
+	theme = 'github-dark',
+	themes = {},
+	defaultColor = 'light',
+	wrap = false,
+	inline = false,
+	transformers = [],
+	...rest
+} = Astro.props;
+
+// shiki 1.0 compat
+if (typeof lang === 'object') {
+	// `id` renamed to `name` (always override)
+	if ((lang as any).id) {
+		lang.name = (lang as any).id;
+	}
+	// `grammar` flattened to lang itself
+	if ((lang as any).grammar) {
+		Object.assign(lang, (lang as any).grammar);
+	}
+}
+
+const highlighter = await getCachedHighlighter({
+	langs: [
+		typeof lang === 'string'
+			? Object.keys(bundledLanguages).includes(lang)
+				? lang
+				: 'plaintext'
+			: (lang as any),
+	],
+	theme,
+	themes,
+});
+
+const html = await highlighter.codeToHtml(code, typeof lang === 'string' ? lang : lang.name, {
+	defaultColor,
+	wrap,
+	inline,
+	transformers,
+	meta,
+	attributes: rest as any,
+});
+---
+
+<Fragment set:html={html} />
+
+===== ./node_modules/astro/components/Debug.astro =====
+---
+import Code from './Code.astro';
+
+const key = Object.keys(Astro.props)[0];
+const value = Astro.props[key];
+---
+
+<div class="astro-debug">
+	<div class="astro-debug-header">
+		<h2 class="astro-debug-title">
+			<span class="astro-debug-label">Debug</span>
+			<span class="astro-debug-name">"{key}"</span>
+		</h2>
+	</div>
+
+	<Code code={JSON.stringify(value, null, 2)} />
+</div>
+
+<style is:inline>
+	.astro-debug {
+		font-size: 14px;
+		padding: 1rem 1.5rem;
+		background: white;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
+			'Helvetica Neue', sans-serif;
+	}
+
+	.astro-debug-header,
+	pre.astro-code {
+		margin: -1rem -1.5rem 1rem;
+		padding: 0.25rem 0.75rem;
+	}
+
+	.astro-debug-header {
+		background: #ff1639;
+		border-radius: 4px;
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+
+	.astro-debug-title {
+		font-size: 1em;
+		color: white;
+		margin: 0.5em 0;
+	}
+
+	.astro-debug-label {
+		font-weight: bold;
+		text-transform: uppercase;
+		margin-right: 0.75em;
+	}
+
+	pre.astro-code {
+		border: 1px solid #eee;
+		padding: 1rem 0.75rem;
+		border-radius: 4px;
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+		font-size: 14px;
+	}
+</style>
+
+===== ./node_modules/astro/components/ResponsivePicture.astro =====
+---
+import { default as Picture, type Props as PictureProps } from './Picture.astro';
+
+type Props = PictureProps;
+
+const { class: className, ...props } = Astro.props;
+import './image.css';
+---
+
+{/* Applying class outside of the spread prevents it from applying unnecessary astro-* classes */}
+
+<Picture {...props} class={className} />
+
+===== ./node_modules/astro/components/ClientRouter.astro =====
+---
+type Fallback = 'none' | 'animate' | 'swap';
+
+export interface Props {
+	fallback?: Fallback;
+	/** @deprecated handleForms is enabled by default in Astro 4.0
+	 *
+	 * Set `data-astro-reload` on your form to opt-out of the default behavior.
+	 */
+	handleForms?: boolean;
+}
+
+const { fallback = 'animate' } = Astro.props;
+---
+
+<style is:global>
+	/* Route announcer */
+	.astro-route-announcer {
+		position: absolute;
+		left: 0;
+		top: 0;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		overflow: hidden;
+		white-space: nowrap;
+		width: 1px;
+		height: 1px;
+	}
+</style>
+<meta name="astro-view-transitions-enabled" content="true" />
+<meta name="astro-view-transitions-fallback" content={fallback} />
+<script>
+	import type { Options } from 'astro:transitions/client';
+	import { supportsViewTransitions, navigate } from 'astro:transitions/client';
+	// NOTE: import from `astro/virtual-modules/prefetch.js` as `astro:prefetch` requires the `prefetch` config to be enabled
+	// @ts-ignore
+	import { init } from 'astro/virtual-modules/prefetch.js';
+
+	type Fallback = 'none' | 'animate' | 'swap';
+	let lastClickedElementLeavingWindow: EventTarget | null = null;
+
+	function getFallback(): Fallback {
+		const el = document.querySelector('[name="astro-view-transitions-fallback"]');
+		if (el) {
+			return el.getAttribute('content') as Fallback;
+		}
+		return 'animate';
+	}
+
+	function isReloadEl(el: HTMLElement | SVGAElement): boolean {
+		return el.dataset.astroReload !== undefined;
+	}
+
+	const leavesWindow = (ev: MouseEvent) =>
+		(ev.button && ev.button !== 0) || // left clicks only
+		ev.metaKey || // new tab (mac)
+		ev.ctrlKey || // new tab (windows)
+		ev.altKey || // download
+		ev.shiftKey; // new window
+
+	if (supportsViewTransitions || getFallback() !== 'none') {
+		if (import.meta.env.DEV && window.matchMedia('(prefers-reduced-motion)').matches) {
+			console.warn(
+				`[transitions]: all view transition animations, including fallback animation, are disabled as this device has the prefer-reduced-motion setting enabled.`,
+			);
+		}
+		document.addEventListener('click', (ev) => {
+			let link = ev.target;
+
+			lastClickedElementLeavingWindow = leavesWindow(ev) ? link : null;
+
+			if (ev.composed) {
+				link = ev.composedPath()[0];
+			}
+			if (link instanceof Element) {
+				link = link.closest('a, area');
+			}
+			if (
+				!(link instanceof HTMLAnchorElement) &&
+				!(link instanceof SVGAElement) &&
+				!(link instanceof HTMLAreaElement)
+			)
+				return;
+			// This check verifies that the click is happening on an anchor
+			// that is going to another page within the same origin. Basically it determines
+			// same-origin navigation, but omits special key combos for new tabs, etc.
+			const linkTarget = link instanceof HTMLElement ? link.target : link.target.baseVal;
+			const href = link instanceof HTMLElement ? link.href : link.href.baseVal;
+			const origin = new URL(href, location.href).origin;
+			if (
+				isReloadEl(link) ||
+				link.hasAttribute('download') ||
+				!link.href ||
+				(linkTarget && linkTarget !== '_self') ||
+				origin !== location.origin ||
+				lastClickedElementLeavingWindow ||
+				ev.defaultPrevented
+			) {
+				// No page transitions in these cases,
+				// Let the browser standard action handle this
+				return;
+			}
+			ev.preventDefault();
+			navigate(href, {
+				history: link.dataset.astroHistory === 'replace' ? 'replace' : 'auto',
+				sourceElement: link,
+			});
+		});
+
+		document.addEventListener('submit', (ev) => {
+			let el = ev.target as HTMLElement;
+			const submitter = ev.submitter;
+
+			const clickedWithKeys = submitter && submitter === lastClickedElementLeavingWindow;
+			lastClickedElementLeavingWindow = null;
+
+			if (el.tagName !== 'FORM' || ev.defaultPrevented || isReloadEl(el) || clickedWithKeys) {
+				return;
+			}
+			const form = el as HTMLFormElement;
+			const formData = new FormData(form, submitter);
+			// form.action and form.method can point to an <input name="action"> or <input name="method">
+			// in which case should fallback to the form attribute
+			const formAction =
+				typeof form.action === 'string' ? form.action : form.getAttribute('action');
+			const formMethod =
+				typeof form.method === 'string' ? form.method : form.getAttribute('method');
+			// Use the form action, if defined, otherwise fallback to current path.
+			let action = submitter?.getAttribute('formaction') ?? formAction ?? location.pathname;
+			// Use the form method, if defined, otherwise fallback to "get"
+			const method = submitter?.getAttribute('formmethod') ?? formMethod ?? 'get';
+
+			// the "dialog" method is a special keyword used within <dialog> elements
+			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method
+			if (method === 'dialog' || location.origin !== new URL(action, location.href).origin) {
+				// No page transitions in these cases,
+				// Let the browser standard action handle this
+				return;
+			}
+
+			const options: Options = { sourceElement: submitter ?? form };
+			if (method === 'get') {
+				const params = new URLSearchParams(formData as any);
+				const url = new URL(action);
+				url.search = params.toString();
+				action = url.toString();
+			} else {
+				options.formData = formData;
+			}
+
+			ev.preventDefault();
+			navigate(action, options);
+		});
+
+		// @ts-expect-error injected by vite-plugin-transitions for treeshaking
+		if (!__PREFETCH_DISABLED__) {
+			init({ prefetchAll: true });
+		}
+	}
+</script>
+
+===== ./node_modules/astro/components/ResponsiveImage.astro =====
+---
+import type { LocalImageProps, RemoteImageProps } from 'astro:assets';
+import Image from './Image.astro';
+
+type Props = LocalImageProps | RemoteImageProps;
+
+const { class: className, ...props } = Astro.props;
+
+import './image.css';
+---
+
+{/* Applying class outside of the spread prevents it from applying unnecessary astro-* classes */}
+<Image {...props} class={className} />
+
+===== ./node_modules/astro/components/Picture.astro =====
+---
+import { getImage, imageConfig, type LocalImageProps, type RemoteImageProps } from 'astro:assets';
+import * as mime from 'mrmime';
+import { isESMImportedImage, resolveSrc } from '../dist/assets/utils/imageKind.js';
+import { AstroError, AstroErrorData } from '../dist/core/errors/index.js';
+import type {
+	GetImageResult,
+	ImageOutputFormat,
+	UnresolvedImageTransform,
+} from '../dist/types/public/index.js';
+import type { HTMLAttributes } from '../types';
+
+export type Props = (LocalImageProps | RemoteImageProps) & {
+	formats?: ImageOutputFormat[];
+	fallbackFormat?: ImageOutputFormat;
+	pictureAttributes?: HTMLAttributes<'picture'>;
+};
+
+const defaultFormats = ['webp'] as const;
+const defaultFallbackFormat = 'png' as const;
+
+// Certain formats don't want PNG fallbacks:
+// - GIF will typically want to stay as a gif, either for animation or for the lower amount of colors
+// - SVGs can't be converted to raster formats in most cases
+// - JPEGs compress photographs and high-noise images better than PNG in most cases
+// For those, we'll use the original format as the fallback instead.
+const specialFormatsFallback = ['gif', 'svg', 'jpg', 'jpeg'] as const;
+
+const { formats = defaultFormats, pictureAttributes = {}, fallbackFormat, ...props } = Astro.props;
+
+if (props.alt === undefined || props.alt === null) {
+	throw new AstroError(AstroErrorData.ImageMissingAlt);
+}
+
+// Picture attribute inherit scoped styles from class and attributes
+const scopedStyleClass = props.class?.match(/\bastro-\w{8}\b/)?.[0];
+if (scopedStyleClass) {
+	if (pictureAttributes.class) {
+		pictureAttributes.class = `${pictureAttributes.class} ${scopedStyleClass}`;
+	} else {
+		pictureAttributes.class = scopedStyleClass;
+	}
+}
+
+const layout = props.layout ?? imageConfig.layout ?? 'none';
+const useResponsive = layout !== 'none';
+
+if (useResponsive) {
+	// Apply defaults from imageConfig if not provided
+	props.layout ??= imageConfig.layout;
+	props.fit ??= imageConfig.objectFit ?? 'cover';
+	props.position ??= imageConfig.objectPosition ?? 'center';
+}
+
+for (const key in props) {
+	if (key.startsWith('data-astro-cid')) {
+		// @ts-expect-error This is for island props so they're not properly typed
+		pictureAttributes[key] = props[key];
+	}
+}
+
+const originalSrc = await resolveSrc(props.src);
+const optimizedImages: GetImageResult[] = await Promise.all(
+	formats.map(
+		async (format) =>
+			await getImage({
+				...props,
+				src: originalSrc,
+				format: format,
+				widths: props.widths,
+				densities: props.densities,
+			} as UnresolvedImageTransform),
+	),
+);
+
+let resultFallbackFormat = fallbackFormat ?? defaultFallbackFormat;
+if (
+	!fallbackFormat &&
+	isESMImportedImage(originalSrc) &&
+	(specialFormatsFallback as ReadonlyArray<string>).includes(originalSrc.format)
+) {
+	resultFallbackFormat = originalSrc.format;
+}
+
+const fallbackImage = await getImage({
+	...props,
+	format: resultFallbackFormat,
+	widths: props.widths,
+	densities: props.densities,
+} as UnresolvedImageTransform);
+
+const imgAdditionalAttributes: HTMLAttributes<'img'> = {};
+const sourceAdditionalAttributes: HTMLAttributes<'source'> = {};
+
+// Propagate the `sizes` attribute to the `source` elements
+if (props.sizes) {
+	sourceAdditionalAttributes.sizes = props.sizes;
+}
+
+if (fallbackImage.srcSet.values.length > 0) {
+	imgAdditionalAttributes.srcset = fallbackImage.srcSet.attribute;
+}
+
+if (import.meta.env.DEV) {
+	imgAdditionalAttributes['data-image-component'] = 'true';
+}
+
+const { class: className, ...attributes } = {
+	...imgAdditionalAttributes,
+	...fallbackImage.attributes,
+};
+---
+
+<picture {...pictureAttributes}>
+	{
+		Object.entries(optimizedImages).map(([_, image]) => {
+			const srcsetAttribute =
+				props.densities || (!props.densities && !props.widths && !useResponsive)
+					? `${image.src}${image.srcSet.values.length > 0 ? ', ' + image.srcSet.attribute : ''}`
+					: image.srcSet.attribute;
+			return (
+				<source
+					srcset={srcsetAttribute}
+					type={mime.lookup(image.options.format ?? image.src) ?? `image/${image.options.format}`}
+					{...sourceAdditionalAttributes}
+				/>
+			);
+		})
+	}
+	{/* Applying class outside of the spread prevents it from applying unnecessary astro-* classes */}
+	<img src={fallbackImage.src} {...attributes} class={className} />
+</picture>
+
+===== ./node_modules/astro/components/Font.astro =====
+---
+import * as mod from 'virtual:astro:assets/fonts/internal';
+import { filterPreloads } from 'astro/assets/fonts/runtime';
+import { AstroError, AstroErrorData } from '../dist/core/errors/index.js';
+
+// TODO: remove check when fonts are stabilized
+const { internalConsumableMap } = mod;
+if (!internalConsumableMap) {
+	throw new AstroError(AstroErrorData.ExperimentalFontsNotEnabled);
+}
+
+interface Props {
+	/** The `cssVariable` registered in your Astro configuration. */
+	cssVariable: import('astro:assets').CssVariable;
+	/** Whether it should output [preload links](https://web.dev/learn/performance/optimize-web-fonts#preload) or not. */
+	preload?: import('astro:assets').FontPreloadFilter;
+}
+
+const { cssVariable, preload = false } = Astro.props as Props;
+const data = internalConsumableMap.get(cssVariable);
+if (!data) {
+	throw new AstroError({
+		...AstroErrorData.FontFamilyNotFound,
+		message: AstroErrorData.FontFamilyNotFound.message(cssVariable),
+	});
+}
+
+const filteredPreloadData = filterPreloads(data.preloadData, preload);
+---
+
+<style set:html={data.css}></style>
+{
+	filteredPreloadData?.map(({ url, type }) => (
+		<link rel="preload" href={url} as="font" type={`font/${type}`} crossorigin />
+	))
+}
+
+===== ./.astro =====
+
+===== ./src/sections/Project.astro =====
+---
+import Carousel from '../components/Carousel.astro';
+---
+
+<section id="projects" class="my-60 flex flex-col gap-16 mx-(--line-margin) sm:gap-24 sm:my-80 md:gap-48 md:my-96">
+	<Carousel text="Tous Les Projets" class='text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem]'/>
+	<div class="relative z-10 flex flex-col items-center gap-16 w-full sm:grid sm:grid-cols-3 sm:items-start">
+		<a href="#" class="sm:max-w-full sm:justify-self-end">
+			<img class="max-w-[200px] sm:max-w-full" src="work1.jpg" alt="work 1">
+		</a>
+		<a href="#" class="sm:max-w-full sm:justify-self-center sm:mt-16">
+			<img class="max-w-[200px] sm:max-w-full" src="work2.jpg" alt="work 2">
+		</a>
+		<a href="#" class="sm:max-w-full sm:justify-self-start">
+			<img class="max-w-[200px] sm:max-w-full" src="work3.jpg" alt="work 3">
+		</a>
+	</div>
+</section>
+
+===== ./src/sections/Physics.astro =====
+---
+import DisplayText from '../components/DisplayText.astro';
+---
+
+<section class="relative overflow-hidden">
+	<div id="bowl" class="relative border border-outline rounded-full h-svh mx-(--line-margin) mt-[calc(2px+var(--line-margin))] bg-fond lg:h-auto lg:aspect-square lg:max-w-[calc(100%-2*var(--line-margin))]">
+		<div class="relative flex flex-col gap-5 top-1/2 -translate-y-1/2 z-10 pointer-events-none md:items-center lg:gap-10">
+			<DisplayText tag='h2' class='mx-4 select-none'>Nous créons des interfaces soignées, façonnées pour donner forme à vos idées et les transfomer en expériences uniques.</DisplayText>
+			<p class="mx-4 text-center select-none">( Appuyez & Faites glisser pour intéragir avec eux ↓ )</p>
+		</div>
+		<div id="logo-letters" class="absolute inset-0">
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect y="41.7891" width="41.7912" height="167.165" fill="#101010"/>
+				<rect x="34.8271" y="83.5801" width="222.886" height="41.7912" fill="#101010"/>
+				<path d="M41.793 41.7912C41.793 18.7105 60.5035 0 83.5841 0H250.749V41.7912H41.793Z" fill="#101010"/>
+				<rect x="250.748" y="41.7891" width="41.7912" height="167.165" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M0 41.7891H41.7912V167.163C18.7105 167.163 0 148.452 0 125.371V41.7891Z" fill="#101010"/>
+				<path d="M41.7959 167.162H250.752C250.752 190.243 232.041 208.953 208.961 208.953H41.7959V167.162Z" fill="#101010"/>
+				<path d="M41.7959 41.7912C41.7959 18.7105 60.5064 0 83.587 0H292.543V41.7912H41.7959Z" fill="#101010"/>
+				<rect x="250.755" y="119.803" width="41.7912" height="47.3633" fill="#101010"/>
+				<rect x="83.5918" y="83.5801" width="208.956" height="41.7912" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M41.792 41.7912C41.792 18.7105 60.5025 0 83.5831 0H292.539V41.7912H41.792Z" fill="#101010"/>
+				<rect x="38.9922" y="83.5801" width="253.533" height="41.7912" fill="#101010"/>
+				<rect y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+				<path d="M41.792 167.162H292.539V208.953H83.5831C60.5025 208.953 41.792 190.243 41.792 167.162Z" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="41.7912" height="208.956" fill="#101010"/>
+				<rect x="36.2217" width="214.528" height="41.7912" fill="#101010"/>
+				<path d="M250.746 41.7891C273.827 41.7891 292.537 60.4996 292.537 83.5802V208.954H250.746V41.7891Z" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M292.538 0V41.791H41.791V167.165C18.7105 167.165 0 148.454 0 125.373V0H292.538Z" fill="#101010"/>
+				<rect x="41.7949" y="167.166" width="250.747" height="41.7912" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M41.7959 41.7912C41.7959 18.7105 60.5064 0 83.587 0H292.543V41.7912H41.7959Z" fill="#101010"/>
+				<rect x="38.9893" y="83.582" width="253.533" height="41.7912" fill="#101010"/>
+				<rect y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+				<path d="M41.7959 167.166H292.543V208.957H83.587C60.5064 208.957 41.7959 190.247 41.7959 167.166Z" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M0 0H41.5302V84.0042C18.5937 84.0042 0 65.4106 0 42.4741V0Z" fill="#101010"/>
+				<path d="M251.078 0H292.608V42.4741C292.608 65.4105 274.015 84.0042 251.078 84.0042V0Z" fill="#101010"/>
+				<path d="M292.567 122.104H292.597V208.939H251.066V125.791H41.5322V208.939H0.00195312V122.104H0.0292969V84H292.567V122.104Z" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+				<path d="M41.7959 41.7912C41.7959 18.7105 60.5064 0 83.587 0H250.752V41.7912H41.7959Z" fill="#101010"/>
+				<path d="M41.7959 167.162H250.752C250.752 190.243 232.041 208.953 208.961 208.953H41.7959V167.162Z" fill="#101010"/>
+				<rect x="250.753" y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M41.791 83.584H250.745V125.375H41.791V208.956H0V41.791H41.791V83.584Z" fill="#101010"/>
+				<rect x="250.737" y="125.377" width="41.7912" height="83.5823" fill="#101010"/>
+				<path d="M250.737 0C273.818 0.000122605 292.528 18.7105 292.528 41.791H292.524V83.5801H250.733V41.791H41.7812V0H250.737Z" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect width="41.7912" height="208.956" fill="#101010"/>
+				<path d="M37.6074 167.162H250.742C250.742 190.243 232.032 208.953 208.951 208.953H37.6074V167.162Z" fill="#101010"/>
+				<path d="M37.6074 0H208.951C232.032 0 250.742 18.7105 250.742 41.7912H37.6074V0Z" fill="#101010"/>
+				<rect x="250.751" y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+			</svg>
+			<svg width="293" height="209" viewBox="0 0 293 209" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M41.7959 41.7912C41.7959 18.7105 60.5064 0 83.587 0H292.543V41.7912H41.7959Z" fill="#101010"/>
+				<rect x="38.9932" y="83.5801" width="253.533" height="41.7912" fill="#101010"/>
+				<rect y="41.7891" width="41.7912" height="125.373" fill="#101010"/>
+				<path d="M41.7959 167.162H292.543V208.953H83.587C60.5064 208.953 41.7959 190.243 41.7959 167.162Z" fill="#101010"/>
+			</svg>
+		</div>
+	</div>
+</section>
+
+<style>
+	#bowl {
+		pointer-events: none;
+	}
+
+	#logo-letters {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+	}
+
+	#logo-letters svg {
+		position: absolute;
+		pointer-events: auto;
+		cursor: grab;
+		top: 0;
+		left: 0;
+		touch-action: none; 
+	}
+
+	#logo-letters svg:active {
+		cursor: grabbing;
+	}
+
+	@media (max-width: 768px) {
+		#logo-letters svg {
+			pointer-events: none;
+			cursor: default;
+		}
+	}
+</style>
+
+<script>
+	import Matter from 'matter-js';
+
+	if (typeof window !== 'undefined')
+	{
+		let engine: Matter.Engine | null = null;
+		let runner: Matter.Runner | null = null;
+		let render: Matter.Render | null = null;
+		let animationFrameId: number | null = null;
+		let resizeTimeout: number | undefined;
+
+		let disableDragModeGlobal: (() => void) | null = null;
+
+		const getLetterScale = (): number =>
+		{
+			const width = window.innerWidth;
+			if (width < 640) return 0.15;
+			if (width < 1024) return 0.31;
+			if (width < 1520) return 0.44;
+			if (width < 1920) return 0.58;
+			if (width < 2560) return 0.75;
+			return 1;
+		};
+
+		const cleanupPhysics = () =>
+		{
+			if (runner) Matter.Runner.stop(runner);
+			if (engine)
+			{
+				Matter.World.clear(engine.world, false);
+				Matter.Engine.clear(engine);
+				if (engine.events) engine.events = {};
+			}
+			if (render)
+			{
+				Matter.Render.stop(render);
+				if (render.canvas) render.canvas.remove();
+			}
+			if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+			// Nettoyage des écouteurs globaux
+			if (disableDragModeGlobal)
+			{
+				window.removeEventListener('mouseup', disableDragModeGlobal);
+				window.removeEventListener('touchend', disableDragModeGlobal);
+				disableDragModeGlobal = null;
+			}
+			
+			engine = null;
+			runner = null;
+			render = null;
+		};
+
+		const initPhysics = () =>
+		{
+			cleanupPhysics();
+
+			const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
+			const { Engine, Runner, Bodies, Composite, Mouse, MouseConstraint, Events } = Matter;
+
+			const bowlElement = document.getElementById('bowl');
+			const logoContainer = document.getElementById('logo-letters');
+
+			if (!bowlElement || !logoContainer) return;
+
+			const letters = Array.from(logoContainer.querySelectorAll('svg'));
+			if (letters.length === 0) return;
+
+			const scale = getLetterScale();
+			const bowlRect = bowlElement.getBoundingClientRect();
+			
+			const width = bowlRect.width;
+			const height = bowlRect.height;
+
+			engine = Engine.create();
+			const world = engine.world;
+
+			world.gravity.y = 1;
+
+			const bowlWalls = [];
+			const wallThickness = 2000;
+			const cornerRadius = Math.min(width, height) / 2;
+			const straightWallHeight = height - cornerRadius * 2;
+			const straightWallWidth = width - cornerRadius * 2;
+
+			// --- Murs (inchangé) ---
+			bowlWalls.push(Bodies.rectangle(-wallThickness / 2, cornerRadius + straightWallHeight / 2, wallThickness, straightWallHeight, { isStatic: true, friction: 0.3, restitution: 0.3 }));
+			bowlWalls.push(Bodies.rectangle(width + wallThickness / 2, cornerRadius + straightWallHeight / 2, wallThickness, straightWallHeight, { isStatic: true, friction: 0.3, restitution: 0.3 }));
+			bowlWalls.push(Bodies.rectangle(cornerRadius + straightWallWidth / 2, -wallThickness / 2, straightWallWidth, wallThickness, { isStatic: true, friction: 0.3, restitution: 0.3 }));
+			bowlWalls.push(Bodies.rectangle(cornerRadius + straightWallWidth / 2, height + wallThickness / 2, straightWallWidth, wallThickness, { isStatic: true, friction: 0.3, restitution: 0.3 }));
+
+			const segments = 20;
+			const corners = [
+				{ cx: cornerRadius, cy: cornerRadius, startAngle: Math.PI, endAngle: Math.PI * 1.5 },
+				{ cx: width - cornerRadius, cy: cornerRadius, startAngle: Math.PI * 1.5, endAngle: Math.PI * 2 },
+				{ cx: width - cornerRadius, cy: height - cornerRadius, startAngle: 0, endAngle: Math.PI * 0.5 },
+				{ cx: cornerRadius, cy: height - cornerRadius, startAngle: Math.PI * 0.5, endAngle: Math.PI }
+			];
+
+			corners.forEach(corner => {
+				const angleStep = (corner.endAngle - corner.startAngle) / segments;
+				for (let i = 0; i < segments; i++) {
+					const angle1 = corner.startAngle + i * angleStep;
+					const angle2 = corner.startAngle + (i + 1) * angleStep;
+					const effectiveRadius = cornerRadius + wallThickness / 2;
+					const x1 = corner.cx + effectiveRadius * Math.cos(angle1);
+					const y1 = corner.cy + effectiveRadius * Math.sin(angle1);
+					const x2 = corner.cx + effectiveRadius * Math.cos(angle2);
+					const y2 = corner.cy + effectiveRadius * Math.sin(angle2);
+					const wallLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+					const wallAngle = Math.atan2(y2 - y1, x2 - x1);
+					bowlWalls.push(Bodies.rectangle((x1 + x2) / 2, (y1 + y2) / 2, wallLength, wallThickness, { isStatic: true, angle: wallAngle, friction: 0.3, restitution: 0.3 }));
+				}
+			});
+
+			Composite.add(world, bowlWalls);
+
+			// --- Lettres ---
+			const letterBodies = letters.map((svg, index) =>
+			{
+				const baseWidth = 293;
+				const baseHeight = 209;
+				const scaledWidth = baseWidth * scale;
+				const scaledHeight = baseHeight * scale;
+				
+				const padding = 50;
+				const startX = padding + Math.random() * (bowlRect.width - padding * 2);
+				const startY = padding + Math.random() * (bowlRect.height - padding * 2);
+
+				const body = Bodies.rectangle(startX, startY, scaledWidth, scaledHeight, {
+					friction: 0.5,
+					restitution: 0.2,
+					density: 0.001,
+					angle: (Math.random() - 0.5) * 0.5
+				});
+				svg.setAttribute('data-body-index', index.toString());
+				return body;
+			});
+
+			Composite.add(world, letterBodies);
+
+			const enableDragMode = () =>
+			{
+				bowlElement.style.pointerEvents = 'all';
+			};
+
+			disableDragModeGlobal = () => {
+				bowlElement.style.pointerEvents = 'none';
+			};
+
+			letters.forEach(svg =>
+			{
+				// On utilise 'mousedown' et 'touchstart' pour réagir immédiatement
+				svg.addEventListener('mousedown', enableDragMode);
+				svg.addEventListener('touchstart', enableDragMode, { passive: true });
+			});
+
+			window.addEventListener('mouseup', disableDragModeGlobal);
+			window.addEventListener('touchend', disableDragModeGlobal);
+
+			// --- Souris et Scroll Fix ---
+			const mouse = Mouse.create(bowlElement);
+			
+			mouse.pixelRatio = window.devicePixelRatio || 1;
+
+			mouse.element.removeEventListener("mousewheel", mouse.mousewheel);
+			mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
+
+			bowlElement.style.pointerEvents = 'none';
+
+			const mouseConstraint = MouseConstraint.create(engine, {
+				mouse: mouse,
+				constraint: {
+					stiffness: 0.2,
+					render: { visible: false }
+				}
+			});
+
+			Events.on(mouseConstraint, 'mousemove', (event) => {
+				mouse.position.x = event.mouse.position.x;
+				mouse.position.y = event.mouse.position.y;
+			});
+
+			Composite.add(world, mouseConstraint);
+
+			runner = Runner.create();
+			Runner.run(runner, engine);
+
+			const updateLetters = () =>
+			{
+				letterBodies.forEach((body, index) =>
+				{
+					const svg = letters[index];
+					const { x, y } = body.position;
+					const angle = body.angle;
+
+					svg.style.transformOrigin = 'center center';
+					svg.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) rotate(${angle}rad) scale(${scale})`;
+				});
+
+				animationFrameId = requestAnimationFrame(updateLetters);
+			};
+
+			updateLetters();
+
+			return () => {
+				cleanupPhysics();
+			};
+		};
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initPhysics);
+		} else {
+			initPhysics();
+		}
+
+		window.addEventListener('resize', () => {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(() => {
+				initPhysics();
+			}, 300);
+		});
+	}
+</script>
+
+===== ./src/sections/Services.astro =====
+---
+import DisplayText from '../components/DisplayText.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+---
+
+<section class="relative overflow-hidden">
+	<div class="relative border border-outline rounded-full min-h-svh mx-(--line-margin) bg-fond p-8 md:p-16 lg:h-auto lg:min-h-0 lg:aspect-square">
+		<div class="relative flex flex-col items-center gap-8 z-10 my-40 sm:mt-84 sm:mb-64 sm:gap-24 md:my-0 md:min-h-svh lg:min-h-0 lg:aspect-square">
+			<DisplayText tag='h2' class='md:pt-[400px] lg:pt-60'>Nous aimons garder les choses simples.</DisplayText>
+			
+			<div class="relative flex flex-col gap-16 text-center sm:gap-24 md:contents">
+				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
+					<svg class="float-svg w-[300px] lg:w-[350px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-72" viewBox="0 0 300 253" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M242.504 115.847C261.749 109.679 282.338 120.301 288.493 139.571L299.638 174.463L264.792 185.63L242.504 115.847ZM90.5622 241.466L55.7168 252.634L44.5722 217.742C38.4177 198.472 49.0287 177.851 68.2732 171.684L90.5622 241.466ZM265.44 184.372L298.382 173.815L287.541 139.876C281.656 121.45 262.203 111.154 243.764 116.507L265.44 184.372ZM67.6292 172.956C49.5135 179.319 39.6389 199.013 45.5241 217.439L56.3644 251.376L89.3042 240.819L67.6292 172.956ZM207.662 127.013L218.805 161.905L183.961 173.073L172.816 138.181L207.662 127.013ZM137.97 149.349L149.114 184.241L114.267 195.408L103.124 160.515L137.97 149.349ZM184.608 171.815L217.55 161.258L207.013 128.272L174.072 138.828L184.608 171.815ZM114.916 194.148L147.856 183.592L137.321 150.605L104.38 161.162L114.916 194.148ZM231.361 80.9542L242.506 115.846L207.66 127.013L196.516 92.1217L231.361 80.9542ZM115.681 79.565L126.824 114.454L161.667 103.29L150.522 68.3986L185.368 57.232L196.513 92.1238L161.667 103.29L172.81 138.181L137.965 149.348L126.821 114.457L91.9786 125.623L80.8342 90.7319L115.681 79.565ZM91.977 125.624L103.119 160.516L68.2754 171.684L57.1307 136.792L91.977 125.624ZM208.307 125.755L241.249 115.198L230.713 82.2116L197.773 92.7678L208.307 125.755ZM128.081 115.104L128.077 115.104L138.613 148.09L171.554 137.533L161.019 104.547L128.081 115.102L128.081 115.104ZM68.9227 170.425L101.864 159.868L91.3272 126.882L58.3863 137.438L68.9227 170.425ZM243.921 0.000879993L255.066 34.8936C261.22 54.1635 250.609 74.7845 231.365 80.952L209.075 11.1675L243.921 0.000879993ZM34.8458 67.006L57.1338 136.789C38.1899 142.86 17.9426 132.662 11.4436 113.961L11.1448 113.064L0.00011969 78.1726L34.8458 67.006ZM232.008 79.6792C250.124 73.3162 259.998 53.6224 254.113 35.1964L243.272 1.2592L210.332 11.8154L232.008 79.6792ZM162.314 102.032L195.254 91.4753L184.72 58.4891L151.778 69.045L162.314 102.032ZM92.6265 124.366L125.565 113.81L125.564 113.809L125.568 113.807L115.031 80.8226L82.091 91.3788L92.6265 124.366ZM12.0963 112.76C17.9815 131.186 37.4337 141.48 55.8722 136.127L34.1966 68.2625L1.25598 78.8199L12.0963 112.76Z" fill="#C4C4C4"/>
+					</svg>
+					<h3 class="text-[2.25rem] font-editorial relative pb-2">Technologie</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+						<li class="relative">Cutting Edge Frameworks</li>
+						<li class="relative">SQL & noSQL</li>
+						<li class="relative">N8N</li>
+						<li class="relative">Docker</li>
+						<li class="relative">AI Powered Workflows</li>
+					</ul>
+				</div>
+
+				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
+					<svg class="float-svg w-[219px] lg:w-[250px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-52" viewBox="0 0 219 219" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M185.214 183.394L177.255 217.943L142.704 209.984L150.663 175.435L185.214 183.394ZM114.151 167.023L106.192 201.572L71.6413 193.613L79.6012 159.063L114.151 167.023ZM43.1097 150.658L35.1508 185.207L0.598966 177.248L8.5588 142.699L43.1097 150.658ZM115.369 166.276C119.996 147.373 138.849 135.581 157.873 139.691L149.915 174.234L115.369 166.276ZM52.2687 115.369C71.1734 119.997 82.9648 138.847 78.8546 157.87L44.3105 149.912L52.2687 115.369ZM201.572 112.347L193.613 146.896L159.062 138.936L167.022 104.388L201.572 112.347ZM59.477 79.6084L51.5181 114.157L16.9663 106.198L24.9251 71.6492L59.477 79.6084ZM174.244 68.6378L166.286 103.18C147.382 98.5521 135.588 79.7011 139.7 60.6784L174.244 68.6378ZM103.176 52.2646C98.5478 71.1683 79.6957 82.9594 60.6714 78.8482L68.6306 44.3051L103.176 52.2646ZM217.941 41.2997L209.983 75.8486L175.431 67.8895L183.39 33.3405L217.941 41.2997ZM146.891 24.9265L138.932 59.4744L104.382 51.5154L112.34 16.9674L146.891 24.9265ZM75.8462 8.5587L67.8874 43.1077L33.3355 35.1485L41.2953 0.599629L75.8462 8.5587Z" stroke="#C4C4C4" fill="none" />
+					</svg>
+
+					<h3 class="text-[2.25rem] font-editorial relative pb-2">Design</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+						<li class="relative">Logo</li>
+						<li class="relative">Web design</li>
+						<li class="relative">Art direction</li>
+						<li class="relative">UX & UI Design</li>
+						<li class="relative">Interactive prototype</li>
+						<li class="relative">Graphic design</li>
+						<li class="relative">Design system</li>
+					</ul>
+				</div>
+
+				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
+					<svg class="float-svg w-[205px] lg:w-[240px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-52" viewBox="0 0 205 232" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M43.6923 186.631C49.1584 205.237 38.7151 224.737 20.3401 230.441L0.619686 163.315L33.7388 153.539L33.7404 153.542L33.9523 153.479L43.6923 186.631ZM111.7 167.448C117.032 185.601 106.847 204.625 88.9229 210.197L69.2015 143.071L101.507 133.535L101.508 133.536L101.718 133.474L111.7 167.448ZM190.097 180.713L156.765 190.553L137.043 123.42L170.374 113.581L190.097 180.713ZM67.7493 142.46L34.6301 152.237L34.6297 152.234L34.4157 152.296L4.57125 50.7116L37.9043 40.8716L67.7493 142.46ZM135.516 122.454L102.395 132.231L102.395 132.23L102.184 132.292L72.3389 30.7057L105.671 20.8658L135.516 122.454ZM204.099 102.21L170.766 112.05L150.904 44.4388C145.438 25.833 155.881 6.33165 174.256 0.627002L204.099 102.21Z" stroke="#C4C4C4" fill="none"/>
+					</svg>
+
+					<h3 class="text-[2.25rem] font-editorial relative pb-2">Développement</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+						<li class="relative">Web</li>
+						<li class="relative">App IOS</li>
+						<li class="relative">Android</li>
+						<li class="relative">Databases</li>
+						<li class="relative">Automation Tools</li>
+						<li class="relative">CRM</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	@keyframes float
+	{
+		0%, 100%
+		{
+			transform: translate(0, 0);
+		}
+		50%
+		{
+			transform: translate(16px, -17px);
+		}
+	}
+
+	@keyframes float-svg
+	{
+		0%, 100%
+		{
+			transform: translate(calc(0px), calc(0px));
+		}
+		50%
+		{
+			transform: translate(calc(-8px), calc(9px));
+
+		}
+	}
+
+	@media (min-width: 1024px)
+	{
+		.float-item
+		{
+			position: absolute;
+			animation: float 10s ease-in-out infinite;
+		}
+
+		.float-item:nth-child(1)
+		{
+			top: 38%;
+			left: 11%;
+			animation-delay: 0s;
+		}
+
+		.float-item:nth-child(2)
+		{
+			top: 48%;
+			right: 11%;
+			animation-delay: -3.3s;
+		}
+
+		.float-item:nth-child(3)
+		{
+			bottom: 12%;
+			left: 30%;
+			transform: translateX(-50%);
+			animation-delay: -6.6s;
+		}
+
+		.float-svg
+		{
+			animation: float-svg 10s ease-in-out infinite;
+		}
+
+		.float-item:nth-child(1) .float-svg
+		{
+			animation-delay: 0s;
+		}
+
+		.float-item:nth-child(2) .float-svg
+		{
+			animation-delay: -3.3s;
+		}
+
+		.float-item:nth-child(3) .float-svg
+		{
+			animation-delay: -6.6s;
+		}
+	}
+
+	@media (min-width: 1520px)
+	{
+		.float-item:nth-child(1)
+		{
+			top: 35%;
+			left: 11%;
+		}
+
+		.float-item:nth-child(2)
+		{
+			top: 35%;
+			right: 11%;
+		}
+
+		.float-item:nth-child(3)
+		{
+			bottom: 25%;
+			left: 40%;
+			transform: translateX(-50%);
+		}
+	}
+</style>
+
+===== ./src/sections/Hero.astro =====
+---
+import DisplayText from '../components/DisplayText.astro';
+import Wrapped from '../components/Wrapped.astro';
+import Weather from '../components/Weather.astro';
+---
+
+<section class='relative h-svh flex flex-col justify-between before:content-[""] before:mt-8 md:items-center'>
+	<span class="absolute h-svh w-circles border border-outline -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full"></span>
+	<DisplayText class='mx-[calc(2*var(--line-margin))]' tag='h2'>
+		Studio horizontal bruxellois, nous cultivons une structure à taille humaine pour être au plus près des besoins de nos clients.
+	</DisplayText>
+	<div class="flex flex-col gap-8 items-center mb-20 sm:gap-12 md:w-full lg:gap-20 xl:gap-36">
+		<h1 class="relative w-full z-10 lg:flex lg:flex-col lg:items-center">
+			<svg class="w-full lg:max-w-[85%]" viewBox="0 0 290 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M228.321 43.0708C228.321 39.663 231.084 36.9004 234.491 36.9004H265.343V43.0708H228.321Z" fill="#101010"/>
+				<rect x="227.908" y="49.2402" width="37.4336" height="6.17037" fill="#101010"/>
+				<rect x="222.15" y="43.0723" width="6.17037" height="18.5111" fill="#101010"/>
+				<path d="M228.321 61.584H265.343V67.7544H234.491C231.084 67.7544 228.321 64.9918 228.321 61.584Z" fill="#101010"/>
+				<rect x="172.796" y="36.9004" width="6.17037" height="30.8519" fill="#101010"/>
+				<path d="M178.349 61.584H209.818C209.818 64.9918 207.055 67.7544 203.647 67.7544H178.349V61.584Z" fill="#101010"/>
+				<path d="M178.349 36.9004H203.647C207.055 36.9004 209.818 39.663 209.818 43.0708H178.349V36.9004Z" fill="#101010"/>
+				<rect x="209.819" y="43.0703" width="6.17037" height="18.5111" fill="#101010"/>
+				<rect x="74.0688" y="43.0703" width="6.17037" height="18.5111" fill="#101010"/>
+				<path d="M80.24 43.0708C80.24 39.663 83.0026 36.9004 86.4104 36.9004H111.092V43.0708H80.24Z" fill="#101010"/>
+				<path d="M80.24 61.584H111.092C111.092 64.9918 108.329 67.7544 104.921 67.7544H80.24V61.584Z" fill="#101010"/>
+				<rect x="111.092" y="43.0703" width="6.17037" height="18.5111" fill="#101010"/>
+				<path d="M129.603 49.2383H160.455V55.4092H129.603V67.75H123.433V43.0684H129.603V49.2383Z" fill="#101010"/>
+				<rect x="160.454" y="55.4102" width="6.17037" height="12.3407" fill="#101010"/>
+				<path d="M160.453 36.8984C163.86 36.8984 166.623 39.6599 166.624 43.0664V49.2373H160.453V43.0693H129.602V36.8984H160.453Z" fill="#101010"/>
+				<path d="M24.7017 36.9004H30.8335V49.3034C27.447 49.3034 24.7017 46.5581 24.7017 43.1716V36.9004Z" fill="#101010"/>
+				<path d="M61.7729 36.9004H67.9048V43.1716C67.9048 46.5581 65.1595 49.3034 61.7729 49.3034V36.9004Z" fill="#101010"/>
+				<path d="M67.8979 54.9277H67.9028V67.749H61.771V55.4717H30.8335V67.749H24.7017V54.9277H24.7056V49.3008H67.8979V54.9277Z" fill="#101010"/>
+				<path d="M104.896 6.17232C104.896 2.76452 107.659 0.00195312 111.067 0.00195312H141.918V6.17232H104.896Z" fill="#101010"/>
+				<rect x="104.483" y="12.3438" width="37.4336" height="6.17037" fill="#101010"/>
+				<rect x="98.7253" y="6.16992" width="6.17037" height="18.5111" fill="#101010"/>
+				<path d="M104.896 24.6816H141.918V30.852H111.067C107.659 30.852 104.896 28.0894 104.896 24.6816Z" fill="#101010"/>
+				<path d="M240.644 0V6.16992H203.62V24.6816C200.213 24.6814 197.45 21.9184 197.45 18.5107V0H240.644Z" fill="#101010"/>
+				<rect x="203.621" y="24.6797" width="37.0222" height="6.17037" fill="#101010"/>
+				<rect x="148.088" y="0.00195312" width="6.17037" height="30.8519" fill="#101010"/>
+				<rect x="153.437" y="0.00195312" width="31.6746" height="6.17037" fill="#101010"/>
+				<path d="M185.11 6.16992C188.518 6.16992 191.281 8.93249 191.281 12.3403V30.8514H185.11V6.16992Z" fill="#101010"/>
+				<path d="M252.978 6.21725C252.978 2.80945 255.741 0.046875 259.148 0.046875H290V6.21725H252.978Z" fill="#101010"/>
+				<rect x="252.563" y="12.3887" width="37.4336" height="6.17037" fill="#101010"/>
+				<rect x="246.806" y="6.2168" width="6.17037" height="18.5111" fill="#101010"/>
+				<path d="M252.978 24.7285H290V30.8989H259.148C255.741 30.8989 252.978 28.1363 252.978 24.7285Z" fill="#101010"/>
+				<path d="M49.3623 6.16992H55.5327V24.681C52.1249 24.681 49.3623 21.9185 49.3623 18.5107V6.16992Z" fill="#101010"/>
+				<path d="M55.5332 24.6816H86.3851C86.3851 28.0894 83.6225 30.852 80.2147 30.852H55.5332V24.6816Z" fill="#101010"/>
+				<path d="M55.5332 6.17232C55.5332 2.76452 58.2958 0.00195312 61.7036 0.00195312H92.5554V6.17232H55.5332Z" fill="#101010"/>
+				<rect x="86.3853" y="17.6895" width="6.17037" height="6.99309" fill="#101010"/>
+				<rect x="61.7041" y="12.3438" width="30.8519" height="6.17037" fill="#101010"/>
+				<rect y="6.16797" width="6.17037" height="24.6815" fill="#101010"/>
+				<rect x="5.14209" y="12.3398" width="32.9087" height="6.17037" fill="#101010"/>
+				<path d="M6.17041 6.17037C6.17041 2.76257 8.93298 0 12.3408 0H37.0223V6.17037H6.17041Z" fill="#101010"/>
+				<rect x="37.022" y="6.16797" width="6.17037" height="24.6815" fill="#101010"/>
+			</svg>
+			<span class="hidden-trick">Agence Horde</span>
+		</h1>
+		<div class="lg:grid grid-cols-3 items-center lg:w-[calc(100%+2*var(--line-margin))] xl:w-[calc(100%+4*var(--line-margin))]">
+			<Weather class="hidden lg:flex lg:justify-self-start"></Weather>
+			<Wrapped device='all' padding='0.625rem' class='lg:justify-self-center'>
+				↓
+			</Wrapped>
+			<p class="hidden lg:block lg:justify-self-end">Agence Numerique Créative</p>
+		</div>
+	</div>
+</section>
+
+===== ./src/pages/projects/belga.astro =====
+---
+import Container from "../../components/Container.astro";
+import Layout from "../../layouts/Layout.astro";
+import Footer from '../../components/Footer.astro';
+import Carousel from '../../components/Carousel.astro';
+import Wrapped from "../../components/Wrapped.astro";
+import HorizontalLine from '../../components/HorizontalLine.astro';
+import ImageContainer from '../../components/ImageContainer.astro';
+import ImageRow from '../../components/ImageRow.astro';
+import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
+---
+<Layout title="Horde - Contact">
+	<Container>
+		<main>
+			<section class="relative mx-(--line-margin) lg:mx-20">
+				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem]" text="Étude de cas (Café Belga - Projet fictif)" speed={20} textColor="#010101"></Carousel>
+				<div class="my-10 flex flex-col gap-10 sm:mt-44 sm:mb-20 sm:gap-16 lg:gap-20 lg:mb-24">
+					<div class="relative flex gap-16 md:w-full md:justify-between md:gap-10">
+						<p class="leading-loose md:max-w-[73%] lg:max-w-[920px]">Nous avons travaillé dans un projet fictif qui était de créer un site web du Café Belga qui serait bien plus qu'un simple site vitrine en ligne: un point de contact stratégique conçu pour transmettre les valeurs, l'esthétique et la vision de la marque. La conception UX/UI a mis l'accent sur la simplicité, la réactivité et la cohérence visuelle. Construite sur React, la plateforme comprend des fonctionnalités avancées permettant de gérer un système de réservation, les dates des prochains évenements et la carte des différents produits du Café Belga.</p>
+						<div class="hidden md:flex md:flex-col md:gap-10">
+							<h3 class="uppercase leading-none md:leading-loose">Type de projet</h3>
+							<ul class="leading-none flex flex-col gap-3">
+								<li>Web Design</li>
+								<li>ReactJS</li>
+								<li>Animation CSS</li>
+								<li>Conception UI & UX</li>
+							</ul>
+						</div>
+					</div>
+					<div class="flex justify-between">
+						<a target="_blank" href="https://belga.nicolas-premont.be">
+							<Wrapped device="all">
+								Voir le projet →
+							</Wrapped>
+						</a>
+						<Wrapped device="all">↓</Wrapped>
+					</div>
+				</div>
+				<HorizontalLine class="mt-2"></HorizontalLine>
+				<ImageContainer class="gap-4 -mt-px">
+					<ImageRow span={2}>
+						<img src="../belga1.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga2.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga3.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga4.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga5.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga6.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga7.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga8.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga9.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga10.jpg" alt="">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga11.jpg" alt="">
+					</ImageRow>
+				</ImageContainer>
+				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16">
+					<h3 class="uppercase leading-none md:hidden">Type de projet</h3>
+					<ul class="leading-none flex flex-col gap-3 md:hidden">
+						<li>Web Design</li>
+						<li>ReactJS</li>
+						<li>Animation CSS</li>
+						<li>Conception UI & UX</li>
+					</ul>
+					<div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-center sm:justify-between">
+						<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.9645 24.0664C12.3639 24.0664 15.9304 27.6328 15.9304 32.0322L7.9645 32.0322L7.9645 24.0664Z" fill="#101010"/>
+							<path d="M31.8663 24.0664C27.4669 24.0664 23.9004 27.6328 23.9004 32.0322L31.8663 32.0322L31.8663 24.0664Z" fill="#101010"/>
+							<rect y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="15.9304" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M7.96533 8.13281H15.9313C15.9313 12.5322 12.3647 16.0986 7.96533 16.0986L7.96533 8.13281Z" fill="#101010"/>
+							<rect x="15.9304" y="32.0352" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
+						</svg>
+						<button class="px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider sm:px-10 sm:py-4 sm:w-fit">Voir tout les projets</button>
+					</div>
+				</div>
+			</section>
+			<HorizontalLine class="mt-10 sm:mt-16"></HorizontalLine>
+		</main>
+		<Footer class="mt-12 sm:mt-16"></Footer>
+	</Container>
+    <BackgroundCanvas 
+		targetId="imgContainer"
+		topOffset={800}
+		bottomOffset={-900}
+	></BackgroundCanvas>
+</Layout>
+
+===== ./src/pages/index.astro =====
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro'
+import Hero from '../sections/Hero.astro';
+import Physics from '../sections/Physics.astro';
+import Services from '../sections/Services.astro';
+import Project from '../sections/Project.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Horde - Home">
+    <Container>
+        <main>
+            <Hero></Hero>
+            <HorizontalLine class="mt-2"></HorizontalLine>
+			<Physics></Physics>
+            <Project></Project>
+			<Services></Services>
+            <HorizontalLine class="relative -mt-16 -z-10! sm:-mt-32 md:-mt-40 lg:-mt-54"></HorizontalLine>
+        </main>
+        <Footer></Footer>
+    </Container>
+    <BackgroundCanvas></BackgroundCanvas>
+</Layout>
+
+===== ./src/pages/contact.astro =====
+---
+import Container from "../components/Container.astro";
+import Layout from "../layouts/Layout.astro";
+import Footer from '../components/Footer.astro';
+import Carousel from '../components/Carousel.astro';
+import Wrapped from "../components/Wrapped.astro";
+import HorizontalLine from '../components/HorizontalLine.astro';
+import ContactForm from "../components/ContactForm.astro";
+---
+
+<Layout title="Horde - Contact" theme="dark">
+	<Container>
+		<main>
+			<section class="relative h-halfscreen flex flex-col items-center">
+				<span class="absolute h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
+
+				<Carousel text="Restons en contact" class="top-1/2 -translate-y-1/2 text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem]"></Carousel>
+				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24 md:-translate-y-28 lg:-translate-y-32">
+					↓
+				</Wrapped>
+			</section>
+            <HorizontalLine class="mt-2" theme="dark"></HorizontalLine>
+			<ContactForm class="mx-(--line-margin) mt-10 md:mt-20 lg:relative lg:left-1/2 lg:-translate-x-1/2 lg:mx-0 lg:my-44"></ContactForm>
+            <HorizontalLine class="mt-12 md:mt-20" theme="dark"></HorizontalLine>
+		</main>
+		<Footer class="mt-12 md:mt-20"></Footer>
+	</Container>
+</Layout>
+
+===== ./src/components/BackgroundCanvas.astro =====
+---
+interface Props {
+	targetId?: string;
+	topOffset?: number;
+	bottomOffset?: number;
+	triggerDistance?: number;
+	triggerDistanceBottom?: number;
+}
+
+const { 
+	targetId = 'projects',
+	topOffset = 500,
+	bottomOffset = -450,
+	triggerDistance = 500,
+	triggerDistanceBottom = 500
+} = Astro.props;
+---
+
+<canvas 
+	id="bg-canvas" 
+	class="fixed top-0 left-0 w-full h-full pointer-events-none -z-1000" 
+	data-target-id={targetId}
+	data-top-offset={topOffset}
+	data-bottom-offset={bottomOffset}
+	data-trigger-distance={triggerDistance}
+	data-trigger-distance-bottom={triggerDistanceBottom}
+></canvas>
+
+<script>
+  const canvas = document.getElementById('bg-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const targetId = canvas.getAttribute('data-target-id') || 'projects';
+  const topOffset = Number(canvas.getAttribute('data-top-offset')) || 500;
+  const bottomOffset = Number(canvas.getAttribute('data-bottom-offset')) || -450;
+  const triggerDistance = Number(canvas.getAttribute('data-trigger-distance')) || 500;
+  const triggerDistanceBottom = Number(canvas.getAttribute('data-trigger-distance-bottom')) || 500;
+
+  let animationId: number | null = null;
+  let resizeTimeout: number | undefined;
+  
+  let pixels: { x: number; y: number; alpha: number }[] = [];
+
+  function getPixelSize(): number
+  {
+	const width = window.innerWidth;
+	
+	if (width < 640) return 15; // Mobile
+	if (width < 1024) return 25; // Tablette
+	if (width < 1920) return 40; // Tablette
+	if (width < 2560) return 50; // Tablette
+	return 65; // Desktop
+  }
+
+  let pixelSize = 20;
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+	pixelSize = getPixelSize();
+  }
+  
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  function getProjectSectionPosition(): number | null {
+    const projectSection = document.getElementById(targetId);
+    if (!projectSection) return null;
+    
+    const rect = projectSection.getBoundingClientRect();
+    return rect.top + window.scrollY;
+  }
+  
+  function updatePixels() {
+    const scrollY = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const projectPos = getProjectSectionPosition() + topOffset;
+    
+    if (!projectPos) {
+      pixels = [];
+      return;
+    }
+    
+    const projectSection = document.getElementById(targetId);
+    if (!projectSection) {
+      pixels = [];
+      return;
+    }
+    
+    const projectRect = projectSection.getBoundingClientRect();
+    const projectEnd = projectRect.bottom + window.scrollY;
+    
+    const distanceToProject = projectPos - (scrollY + viewportHeight);
+    
+    // Calculer la progression d'entrée (depuis le bas)
+    const progressIn = Math.max(0, Math.min(1, 1 - distanceToProject / triggerDistance));
+    
+    // Calculer la progression de sortie (après la section)
+    const distanceAfterProject = scrollY - (projectEnd + bottomOffset);
+    const progressOut = Math.max(0, Math.min(1, distanceAfterProject / triggerDistanceBottom));
+    
+    // La progression finale combine entrée et sortie
+    const finalProgress = progressIn * (1 - progressOut);
+    
+    // Déterminer si on est en train de sortir par le haut (remontant) ou par le bas (descendant)
+    const isExitingTop = scrollY + viewportHeight < projectPos && progressIn < 1;
+    const isExitingBottom = scrollY > (projectEnd + bottomOffset);
+    
+    if (finalProgress === 0) {
+      pixels = [];
+      return;
+    }
+    
+    // Calculer tous les pixels possibles pour remplir complètement l'écran
+    const cols = Math.floor(canvas.width / pixelSize) + 1;
+    const rows = Math.floor(canvas.height / pixelSize) + 1;
+    const maxPixels = cols * rows;
+    
+    // À 100% de progression, on veut TOUS les pixels
+    const targetPixelCount = Math.floor(maxPixels * finalProgress);
+    
+    // Créer un Set des positions déjà occupées
+    const occupiedPositions = new Set(pixels.map(p => `${p.x},${p.y}`));
+    
+    // Générer toutes les positions possibles non occupées
+    const availablePositions: {x: number, y: number}[] = [];
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * pixelSize;
+        const y = row * pixelSize;
+        if (!occupiedPositions.has(`${x},${y}`)) {
+          availablePositions.push({x, y});
+        }
+      }
+    }
+    
+    // Trier les positions avec une pondération : priorité selon la direction
+    availablePositions.sort((a, b) => {
+      const randomWeight = 200;
+      if (isExitingBottom) {
+        // Si on est après la section et qu'on remonte, apparaître depuis le haut
+        const scoreA = -a.y - Math.random() * randomWeight;
+        const scoreB = -b.y - Math.random() * randomWeight;
+        return scoreB - scoreA;
+      } else {
+        // Sinon apparaître depuis le bas (comportement normal)
+        const scoreA = a.y - Math.random() * randomWeight;
+        const scoreB = b.y - Math.random() * randomWeight;
+        return scoreB - scoreA;
+      }
+    });
+    
+    // Ajouter les pixels manquants
+    const pixelsToAdd = targetPixelCount - pixels.length;
+    if (pixelsToAdd > 0) {
+      for (let i = 0; i < Math.min(pixelsToAdd, availablePositions.length); i++) {
+        pixels.push({
+          x: availablePositions[i].x,
+          y: availablePositions[i].y,
+          alpha: 1
+        });
+      }
+    } else if (pixelsToAdd < 0) {
+      // Supprimer avec variation aléatoire selon la direction
+      pixels.sort((a, b) => {
+        const randomWeight = 200;
+        if (isExitingTop) {
+          // Supprimer depuis le haut (valeurs Y plus petites en premier)
+          const scoreA = -a.y + Math.random() * randomWeight;
+          const scoreB = -b.y + Math.random() * randomWeight;
+          return scoreA - scoreB;
+        } else {
+          // Supprimer depuis le bas (valeurs Y plus grandes en premier)
+          const scoreA = a.y + Math.random() * randomWeight;
+          const scoreB = b.y + Math.random() * randomWeight;
+          return scoreA - scoreB;
+        }
+      });
+      pixels.length = targetPixelCount;
+    }
+  }
+  
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    pixels.forEach(pixel => {
+      ctx.fillStyle = `rgb(16, 16, 16)`;
+      ctx.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
+    });
+  }
+  
+  function animate() {
+    updatePixels();
+    draw();
+    requestAnimationFrame(animate);
+  }
+  
+	window.addEventListener('resize', () =>
+	{
+		clearTimeout(resizeTimeout);
+		
+		resizeTimeout = setTimeout(() =>
+		{
+			pixels = [];
+			resizeCanvas();
+		}, 200);
+	});
+
+  // Démarrer l'animation
+  animate();
+</script>
+
+===== ./src/components/HorizontalLine.astro =====
+---
+interface Props {
+	class: string;
+	theme?: 'light' | 'dark';
+}
+
+const { class: className = '', theme: theme = 'light' } = Astro.props;
+---
+
+<div class=`relative w-screen left-1/2 -translate-1/2 -z-9999 ${className}`>
+	<div class=`w-full h-px ${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'}`></div>
+	<svg class="absolute top-0 -translate-1/2 left-(--line-margin) md:left-[calc(2*var(--line-margin))] xl:left-[calc(3*var(--line-margin))] ml-px md:-ml-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
+		<rect width="7" height="7" fill=`${theme === 'dark' ? '#f1f1f1' : '#101010'}`/>
+	</svg>
+
+	<svg class="absolute top-0 -translate-y-1/2 translate-x-1/2 right-(--line-margin) md:right-[calc(2*var(--line-margin))] xl:right-[calc(3*var(--line-margin))] mr-px md:-mr-px z-10" width="7" height="7" viewBox="0 0 7 7" xmlns="http://www.w3.org/2000/svg">
+		<rect width="7" height="7" fill=`${theme === 'dark' ? '#f1f1f1' : '#101010'}`/>
+	</svg>
+</div>
+
+===== ./src/components/Languages.astro =====
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div id="lang-dropdown" class=`hidden text-[0.875rem] ${className}`>
+	<button class="lang-option active" data-lang="fr">Français</button>
+	<button class="lang-option" data-lang="en">English</button>
+</div>
+
+<style>
+	.active{
+		position: relative;
+		text-decoration: none;
+		border-bottom: 1px solid;
+		display: inline-block;
+	}
+</style>
+
+<script>
+	const langOptions = document.querySelectorAll('.lang-option');
+	const langDropdown = document.getElementById('lang-dropdown');
+
+	langOptions.forEach(option => {
+		option.addEventListener('click', () => {
+			
+			langOptions.forEach(opt => opt.classList.remove('active'));
+			option.classList.add('active');
+			
+			langDropdown?.classList.add('hidden');
+			
+			console.log('Language changed to:', option.getAttribute('data-lang'));
+		});
+	});
+</script>
+
+
+===== ./src/components/Wrapped.astro =====
+---
+interface Props {
+	device?: 'all' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+	padding?: string;
+	class?: string;
+}
+
+const { device = 'all', padding = '0.5rem', class: className = '' } = Astro.props;
+
+const deviceClass = {
+	all: '!flex',
+	xs: 'xs:flex',
+	sm: 'sm:flex',
+	md: 'md:flex',
+	lg: 'lg:flex',
+	xl: 'xl:flex',
+	'2xl': '2xl:flex'
+}[device];
+---
+
+<div class={`hidden ${deviceClass} items-center ${className}`}>
+	<span class="bracket" style={`padding-right: ${padding};`}>
+		<svg width="3" height="13" viewBox="0 0 3 13" xmlns="http://www.w3.org/2000/svg">
+			<path d="M0 12.7004V0H2.478V0.810048H0.854V11.8904H2.478V12.7004H0Z"/>
+		</svg>
+	</span>
+	<slot />
+	<span class="bracket" style={`padding-left: ${padding};`}>
+		<svg width="3" height="13" viewBox="0 0 3 13" xmlns="http://www.w3.org/2000/svg">
+			<path d="M2.478 12.7004H0V11.8904H1.62399V0.810048H0V0H2.478V12.7004Z"/>
+		</svg>
+	</span>
+</div>
+
+<div class={deviceClass?.replace('flex', 'hidden').replace('!', '')}>
+	<slot />
+</div>
+
+===== ./src/components/Footer.astro =====
+---
+import TextLink from './TextLink.astro';
+import Wrapped from './Wrapped.astro';
+
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<footer class={`relative mt-8 flex flex-col gap-12 z-20 sm:mt-20 md:gap-24 lg:mt-24 lg:gap-44 ${className}`}>
+	<svg class="w-full" viewBox="0 0 599 136" xmlns="http://www.w3.org/2000/svg">
+		<path d="M135.73 27.2H121.639V13.1705H135.73V27.2Z"/>
+		<path d="M0 133.333V129.833C5.37008 129.833 9.22983 129.5 11.5792 128.833C14.0405 128.167 15.6068 127 16.2781 125.333C17.0612 123.667 17.4528 121 17.4528 117.333V16C17.4528 12.3333 17.0612 9.66666 16.2781 8C15.6068 6.33333 14.0405 5.16666 11.5792 4.49999C9.22983 3.83333 5.37008 3.49999 0 3.49999V0H39.2687C51.5751 0 62.7069 2.66666 72.6639 8C82.7328 13.3333 90.6761 21.1111 96.4936 31.3333C102.311 41.5555 105.22 53.7222 105.22 67.8333C105.22 81.1667 102.535 92.7778 97.1649 102.667C91.9067 112.556 84.4669 120.167 74.8455 125.5C65.336 130.722 54.2602 133.333 41.6181 133.333H0ZM40.1078 127.667C52.0786 127.667 62.0916 125.056 70.1467 119.833C78.3137 114.5 84.355 107.389 88.2707 98.5C92.1864 89.6111 94.1442 79.6111 94.1442 68.5C94.1442 56.1667 91.7948 45.2778 87.096 35.8333C82.5091 26.2778 76.1321 18.8889 67.9651 13.6667C59.91 8.33333 50.848 5.66666 40.7791 5.66666C37.0871 5.66666 33.9546 5.94444 31.3814 6.5C29.032 6.94444 27.8573 8.44444 27.8573 11V120.5C27.8573 123.278 28.8082 125.167 30.7102 126.167C32.7239 127.167 35.8565 127.667 40.1078 127.667Z"/>
+		<path d="M135.039 117.333C135.039 121 135.262 123.667 135.71 125.333C136.269 127 137.276 128.167 138.731 128.833C140.297 129.5 142.758 129.833 146.114 129.833V133.333H114.733V129.833C118.089 129.833 120.495 129.5 121.949 128.833C123.515 128.167 124.522 127 124.97 125.333C125.529 123.667 125.809 121 125.809 117.333V61.8333C125.809 57.6111 125.641 54.8333 125.305 53.5C124.97 52.1667 124.075 51.5 122.62 51.5C121.166 51.5 119.096 52.0555 116.411 53.1667L115.069 49.8333L127.319 45L133.025 42.8333L135.039 44.6667V117.333Z"/>
+		<path d="M180.244 136C176.887 136 173.811 135.389 171.014 134.167C168.217 133.056 165.812 131.722 163.798 130.167C163.015 129.5 162.232 129.167 161.448 129.167C160.665 129.167 159.994 129.778 159.435 131L158.26 134.333H154.904L154.065 99.3333H157.253C158.26 109.444 160.833 117.167 164.973 122.5C169.112 127.722 173.979 130.333 179.572 130.333C183.712 130.333 186.844 128.944 188.97 126.167C191.208 123.278 192.326 119.444 192.326 114.667C192.326 111.778 191.767 109.333 190.648 107.333C189.641 105.222 187.907 103 185.446 100.667C183.097 98.2222 179.013 94.4444 173.196 89.3333C166.259 83.3333 161.504 78.5555 158.931 75C156.358 71.4444 155.072 67.5 155.072 63.1667C155.072 57.2778 156.917 52.4444 160.609 48.6667C164.413 44.7778 169.28 42.8333 175.209 42.8333C180.579 42.8333 185.39 44.6667 189.641 48.3333C190.425 49.1111 191.208 49.5 191.991 49.5C192.998 49.5 193.613 48.8333 193.837 47.5L194.508 44H197.864L198.2 72H194.844C194.172 65.1111 192.159 59.5 188.802 55.1667C185.558 50.7222 181.251 48.5 175.881 48.5C172.301 48.5 169.336 49.7222 166.986 52.1667C164.637 54.5 163.462 57.5556 163.462 61.3333C163.462 64.8889 164.525 68 166.651 70.6667C168.888 73.3333 173.14 77.2778 179.405 82.5C187.46 89.3889 193.054 94.9444 196.186 99.1667C199.319 103.389 200.885 108.222 200.885 113.667C200.885 120.778 198.871 126.278 194.844 130.167C190.928 134.056 186.061 136 180.244 136Z"/>
+		<path d="M238.438 136C229.935 136 223.222 131.833 218.3 123.5C213.489 115.056 211.084 104.111 211.084 90.6667C211.084 81.5555 212.203 73.3889 214.44 66.1667C216.789 58.9444 220.202 53.2778 224.677 49.1667C229.152 44.9444 234.522 42.8333 240.787 42.8333C246.94 42.8333 251.863 44.8333 255.555 48.8333C259.359 52.7222 261.26 57.5556 261.26 63.3333C261.26 66.4444 260.645 68.8333 259.414 70.5C258.296 72.0556 256.673 72.8333 254.548 72.8333C252.646 72.8333 251.192 72.2778 250.185 71.1667C249.29 70.0555 248.842 68.6667 248.842 67C248.842 65.7778 249.01 64.5 249.346 63.1667C249.793 60.9444 250.017 59.1667 250.017 57.8333C250.017 54.8333 249.178 52.5556 247.5 51C245.821 49.3333 243.528 48.5 240.619 48.5C234.018 48.5 229.04 52.2778 225.684 59.8333C222.439 67.3889 220.817 76.5 220.817 87.1667C220.817 98.6111 222.663 108.167 226.355 115.833C230.047 123.5 235.081 127.333 241.458 127.333C245.71 127.333 249.569 125.056 253.037 120.5C256.618 115.944 259.079 108.389 260.421 97.8333H263.945C263.274 110.611 260.533 120.167 255.723 126.5C251.024 132.833 245.262 136 238.438 136Z"/>
+		<path d="M321.182 134L320.847 120.667L320.343 120.5C317.546 124.944 314.022 128.667 309.771 131.667C305.52 134.556 300.988 136 296.178 136C290.92 136 286.948 134 284.263 130C281.578 126 280.235 120.556 280.235 113.667V63C280.235 58.8889 280.068 56.1667 279.732 54.8333C279.396 53.3889 278.445 52.6667 276.879 52.6667C275.76 52.6667 273.523 53.2222 270.166 54.3333L268.992 51L287.787 44.5L289.633 46.3333V112.5C289.633 122.722 293.045 127.833 299.87 127.833C303.338 127.833 306.918 126.611 310.61 124.167C314.414 121.722 317.826 118.611 320.847 114.833V63C320.847 58.8889 320.679 56.1667 320.343 54.8333C320.008 53.3889 319.057 52.6667 317.49 52.6667C316.372 52.6667 314.134 53.2222 310.778 54.3333L309.603 51L328.398 44.5L330.244 46.3333V116.833C330.244 120.833 330.412 123.556 330.748 125C331.083 126.333 331.922 127 333.265 127C334.719 127 337.069 126.278 340.313 124.833L341.656 128.167L328.398 133.667L323.364 135.833L321.182 134Z"/>
+		<path d="M391.518 97.8333C391.518 110.722 390.175 120.333 387.49 126.667C384.805 132.889 379.994 136 373.058 136C367.24 136 362.933 133.778 360.136 129.333C357.451 124.778 356.109 117.111 356.109 106.333V51.3333H344.026V46.5C354.654 46.3889 360.36 38.2778 361.143 22.1667H365.339V45.6667H385.812V51.3333H365.506V100.5C365.506 109.944 366.122 116.944 367.352 121.5C368.583 125.944 371.324 128.167 375.575 128.167C379.603 128.167 382.624 125.722 384.637 120.833C386.651 115.833 387.658 108.167 387.658 97.8333H391.518Z"/>
+		<path d="M431.366 136C425.325 136 419.899 134 415.088 130C410.277 125.889 406.529 120.333 403.844 113.333C401.159 106.333 399.817 98.5 399.817 89.8333C399.817 81.1667 401.047 73.2778 403.509 66.1667C406.082 58.9444 409.718 53.2778 414.417 49.1667C419.227 44.9444 424.877 42.8333 431.366 42.8333C437.407 42.8333 442.777 44.8889 447.476 49C452.287 53 456.035 58.5 458.72 65.5C461.405 72.5 462.747 80.3333 462.747 89C462.747 97.6667 461.461 105.611 458.888 112.833C456.426 119.944 452.846 125.611 448.147 129.833C443.449 133.944 437.855 136 431.366 136ZM433.548 130.167C439.925 130.167 444.735 126.833 447.98 120.167C451.336 113.5 453.014 105.5 453.014 96.1667C453.014 88.2778 452.063 80.7222 450.161 73.5C448.371 66.1667 445.686 60.2222 442.106 55.6667C438.526 51 434.219 48.6667 429.184 48.6667C422.695 48.6667 417.773 52 414.417 58.6667C411.172 65.3333 409.55 73.3889 409.55 82.8333C409.55 90.7222 410.445 98.3333 412.235 105.667C414.137 112.889 416.878 118.778 420.458 123.333C424.038 127.889 428.401 130.167 433.548 130.167Z"/>
+		<path d="M471.226 129.833C474.47 129.833 476.82 129.5 478.274 128.833C479.84 128.167 480.847 127 481.295 125.333C481.854 123.667 482.134 121 482.134 117.333V61.8333C482.134 57.7222 481.966 55 481.63 53.6667C481.295 52.2222 480.456 51.5 479.113 51.5C477.771 51.5 475.533 52.1667 472.401 53.5L471.058 50.1667L489.182 42.8333L491.364 44.6667V58.6667H491.867C496.007 53.3333 499.866 49.3889 503.446 46.8333C507.026 44.1667 511.166 42.8333 515.865 42.8333C521.57 42.8333 525.822 44.8333 528.619 48.8333C531.416 52.8333 532.814 58.3333 532.814 65.3333V117.333C532.814 121 533.038 123.667 533.485 125.333C534.045 127 535.052 128.167 536.506 128.833C537.96 129.5 540.31 129.833 543.554 129.833V133.333H513.012V129.833C516.256 129.833 518.606 129.5 520.06 128.833C521.514 128.167 522.465 127 522.913 125.333C523.36 123.667 523.584 121 523.584 117.333V65.8333C523.584 60.9444 522.633 57.2778 520.731 54.8333C518.829 52.3889 516.088 51.1667 512.508 51.1667C508.816 51.1667 505.292 52.2778 501.936 54.5C498.692 56.7222 495.167 60 491.364 64.3333V117.333C491.364 121 491.587 123.667 492.035 125.333C492.482 127 493.433 128.167 494.888 128.833C496.342 129.5 498.692 129.833 501.936 129.833V133.333H471.226V129.833Z"/>
+		<path d="M578.359 136C575.003 136 571.926 135.389 569.129 134.167C566.332 133.056 563.927 131.722 561.913 130.167C561.13 129.5 560.347 129.167 559.563 129.167C558.78 129.167 558.109 129.778 557.55 131L556.375 134.333H553.019L552.18 99.3333H555.368C556.375 109.444 558.948 117.167 563.088 122.5C567.227 127.722 572.094 130.333 577.688 130.333C581.827 130.333 584.959 128.944 587.085 126.167C589.323 123.278 590.441 119.444 590.441 114.667C590.441 111.778 589.882 109.333 588.763 107.333C587.756 105.222 586.022 103 583.561 100.667C581.212 98.2222 577.128 94.4444 571.31 89.3333C564.374 83.3333 559.619 78.5555 557.046 75C554.473 71.4444 553.186 67.5 553.186 63.1667C553.186 57.2778 555.032 52.4444 558.724 48.6667C562.528 44.7778 567.395 42.8333 573.324 42.8333C578.694 42.8333 583.505 44.6667 587.756 48.3333C588.539 49.1111 589.323 49.5 590.106 49.5C591.113 49.5 591.728 48.8333 591.952 47.5L592.623 44H595.979L596.315 72H592.959C592.287 65.1111 590.274 59.5 586.917 55.1667C583.673 50.7222 579.366 48.5 573.996 48.5C570.415 48.5 567.451 49.7222 565.101 52.1667C562.752 54.5 561.577 57.5556 561.577 61.3333C561.577 64.8889 562.64 68 564.766 70.6667C567.003 73.3333 571.255 77.2778 577.52 82.5C585.575 89.3889 591.169 94.9444 594.301 99.1667C597.434 103.389 599 108.222 599 113.667C599 120.778 596.986 126.278 592.959 130.167C589.043 134.056 584.176 136 578.359 136Z"/>
+	</svg>
+
+	<ul class="flex flex-col items-center text-center gap-5 mb-16 lg:grid lg:grid-cols-3 lg:items-center">
+		<li class="lg:col-start-2 lg:justify-self-center">
+			<TextLink href="mailto:hello@hordeagence.com" class='block! md:hidden!'>hello@hordeagence.com</TextLink>
+			<a href="">
+				<Wrapped class='hidden! md:flex!' padding='2rem'>
+					<svg width="598" height="19" viewBox="0 0 598 19" xmlns="http://www.w3.org/2000/svg">
+						<rect x="119.552" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M123.227 4.27913C123.227 2.24699 124.874 0.599609 126.907 0.599609H141.625V4.27913H123.227Z"/>
+						<path d="M123.227 15.3184H141.625C141.625 17.3505 139.977 18.9979 137.945 18.9979H123.227V15.3184Z"/>
+						<rect x="141.637" y="4.28125" width="3.67951" height="11.0386"/>
+						<rect x="63.4604" y="15.3184" width="22.0778" height="3.67931"/>
+						<path d="M59.7881 0.599609H63.4677V15.3169C61.4355 15.3169 59.7881 13.6694 59.7881 11.6372V0.599609Z"/>
+						<rect x="93.3452" y="15.3184" width="22.0778" height="3.67931"/>
+						<path d="M89.6699 0.599609H93.3496V15.3169C91.3174 15.3169 89.6699 13.6694 89.6699 11.6372V0.599609Z"/>
+						<path d="M33.5762 4.27913C33.5762 2.24699 35.2236 0.599609 37.2557 0.599609H55.6532V4.27913H33.5762Z"/>
+						<rect x="33.3359" y="7.96094" width="22.3224" height="3.67952"/>
+						<rect x="29.8975" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M33.5762 15.3184H55.6532V18.9979H37.2557C35.2235 18.9979 33.5762 17.3505 33.5762 15.3184Z"/>
+						<path d="M0 0.599609H3.65653V7.9958C1.63709 7.9958 0 6.35872 0 4.33927V0.599609Z"/>
+						<path d="M22.1113 0.599609H25.7679V4.33927C25.7679 6.35872 24.1308 7.9958 22.1113 7.9958V0.599609Z"/>
+						<path d="M25.7603 11.6758H25.7593V18.9961H22.103V11.6758H3.66064V18.9961H0.00341797V7.99609H25.7603V11.6758Z"/>
+						<path d="M158.463 18.9992C156.659 18.9992 155.07 18.609 153.698 17.8286C152.34 17.0483 151.289 15.9452 150.543 14.5195C149.812 13.0788 149.447 11.4055 149.447 9.4996C149.447 7.6387 149.835 5.9879 150.61 4.5472C151.401 3.1065 152.49 1.98846 153.877 1.19308C155.264 0.397693 156.845 0 158.62 0C160.365 0 161.901 0.375182 163.229 1.12554C164.556 1.8609 165.578 2.8964 166.294 4.23205C167.025 5.55269 167.39 7.06842 167.39 8.77925C167.39 10.5051 166.965 11.8107 166.115 12.6961C165.28 13.5666 164.176 14.0018 162.804 14.0018H160.723L160.589 12.3585H160.365C160.126 12.9438 159.761 13.394 159.269 13.7091C158.777 14.0243 158.187 14.1819 157.501 14.1819H157.434C156.987 14.1819 156.554 14.0918 156.136 13.9117C155.719 13.7316 155.368 13.454 155.085 13.0788C154.816 12.6886 154.682 12.1934 154.682 11.5931V11.458C154.682 10.6326 154.973 10.0098 155.555 9.58964C156.151 9.15443 157.031 8.86179 158.195 8.71171L161.26 8.30652L161.372 9.58964L158.172 10.0173C157.516 10.1224 157.024 10.28 156.696 10.4901C156.383 10.6852 156.226 10.9778 156.226 11.368V11.5031C156.226 11.9083 156.353 12.2234 156.606 12.4485C156.875 12.6586 157.225 12.7637 157.658 12.7637H157.725C158.322 12.7637 158.821 12.6586 159.224 12.4485C159.627 12.2384 159.94 11.8782 160.164 11.368C160.402 10.8427 160.522 10.1224 160.522 9.20695V8.28401C160.522 7.60868 160.358 7.08343 160.029 6.70825C159.716 6.31806 159.269 6.12296 158.687 6.12296H158.598C158.001 6.12296 157.539 6.28054 157.21 6.59569C156.882 6.89584 156.703 7.33855 156.673 7.92383H155.107C155.152 6.93335 155.495 6.14547 156.136 5.56019C156.778 4.97491 157.628 4.68227 158.687 4.68227H158.732C159.821 4.68227 160.641 5.01243 161.193 5.67275C161.76 6.33306 162.043 7.241 162.043 8.39656V12.4035H162.916C163.811 12.4035 164.512 12.1184 165.019 11.5481C165.541 10.9628 165.802 10.0399 165.802 8.77925C165.802 7.35356 165.511 6.10045 164.929 5.01993C164.348 3.9244 163.512 3.07649 162.423 2.4762C161.35 1.8609 160.089 1.55325 158.642 1.55325C157.151 1.55325 155.831 1.88341 154.682 2.54373C153.534 3.18904 152.639 4.11949 151.997 5.33508C151.356 6.53566 151.035 7.92383 151.035 9.4996C151.035 11.1204 151.334 12.5311 151.93 13.7316C152.542 14.9172 153.407 15.8327 154.526 16.478C155.644 17.1233 156.957 17.4459 158.463 17.4459C160.432 17.4459 162.051 16.9282 163.318 15.8927L164.258 17.1533C163.527 17.7386 162.67 18.1888 161.685 18.504C160.701 18.8341 159.627 18.9992 158.463 18.9992Z"/>
+						<path d="M294.786 4.27913C294.786 2.24699 296.434 0.599609 298.466 0.599609H316.863V4.27913H294.786Z"/>
+						<rect x="294.549" y="7.96094" width="22.3224" height="3.67952"/>
+						<rect x="291.111" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M294.786 15.3184H316.863V18.9979H298.466C296.434 18.9979 294.786 17.3505 294.786 15.3184Z"/>
+						<rect x="261.217" y="0.599609" width="3.67951" height="18.3976"/>
+						<path d="M264.527 15.3184H283.292C283.292 17.3505 281.645 18.9979 279.613 18.9979H264.527V15.3184Z"/>
+						<path d="M264.527 0.599609H279.613C281.645 0.599609 283.292 2.24699 283.292 4.27913H264.527V0.599609Z"/>
+						<rect x="283.301" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M234.991 7.96484H253.388V11.6445H234.991V19.001H231.311V4.2832H234.991V7.96484Z"/>
+						<rect x="253.396" y="11.6406" width="3.67951" height="7.35905"/>
+						<path d="M257.076 7.96289H253.396V4.2832H257.076V7.96289ZM253.408 0.601562C255.44 0.601617 257.087 2.24835 257.087 4.28027H235.01V0.601562H253.408Z"/>
+						<rect x="201.417" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M205.095 4.27913C205.095 2.24699 206.742 0.599609 208.774 0.599609H223.492V4.27913H205.095Z"/>
+						<path d="M205.095 15.3184H223.492C223.492 17.3505 221.845 18.9979 219.813 18.9979H205.095V15.3184Z"/>
+						<rect x="223.501" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M171.52 0.599609H175.177V7.9958C173.157 7.9958 171.52 6.35872 171.52 4.33927V0.599609Z"/>
+						<path d="M193.625 0.599609H197.282V4.33927C197.282 6.35872 195.645 7.9958 193.625 7.9958V0.599609Z"/>
+						<path d="M197.28 11.0176H197.286V18.9961H193.629V11.6758H175.18V18.9961H171.523V7.99609H197.28V11.0176Z"/>
+						<path d="M471.859 4.27718C471.859 2.24503 473.507 0.597656 475.539 0.597656H493.936V4.27718H471.859Z"/>
+						<rect x="471.622" y="7.95898" width="22.3224" height="3.67952"/>
+						<rect x="468.184" y="4.27734" width="3.67951" height="11.0386"/>
+						<path d="M471.859 15.3184H493.936V18.9979H475.539C473.507 18.9979 471.859 17.3505 471.859 15.3184Z"/>
+						<path d="M464.475 0.599609V4.2793H442.402V15.3174C440.37 15.3174 438.722 13.6698 438.722 11.6377V0.599609H464.475Z"/>
+						<rect x="442.41" y="15.3184" width="22.0771" height="3.67952"/>
+						<rect x="409.302" y="0.597656" width="3.67951" height="18.3976"/>
+						<rect x="412.49" y="0.597656" width="18.8882" height="3.67952"/>
+						<path d="M431.371 4.28125C433.403 4.28125 435.051 5.92862 435.051 7.96076V18.9993H431.371V4.28125Z"/>
+						<path d="M383.554 4.27718C383.554 2.24503 385.201 0.597656 387.233 0.597656H405.631V4.27718H383.554Z"/>
+						<rect x="383.316" y="7.95898" width="22.3224" height="3.67952"/>
+						<rect x="379.878" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M383.554 15.3184H405.631V18.9979H387.233C385.201 18.9979 383.554 17.3505 383.554 15.3184Z"/>
+						<path d="M350.425 4.28125H354.105V15.3198C352.073 15.3198 350.425 13.6725 350.425 11.6403V4.28125Z"/>
+						<path d="M354.101 15.3184H372.498C372.498 17.3505 370.851 18.9979 368.819 18.9979H354.101V15.3184Z"/>
+						<path d="M354.101 4.27718C354.101 2.24503 355.748 0.597656 357.78 0.597656H376.178V4.27718H354.101Z"/>
+						<rect x="372.495" y="11.1465" width="3.67951" height="4.17013"/>
+						<rect x="357.794" y="7.95898" width="18.3976" height="3.67952"/>
+						<rect x="321.002" y="4.28125" width="3.67951" height="14.7181"/>
+						<rect x="324.068" y="7.95898" width="19.6241" height="3.67952"/>
+						<path d="M324.677 4.27718C324.677 2.24503 326.325 0.597656 328.357 0.597656H343.075V4.27718H324.677Z"/>
+						<rect x="343.086" y="4.28125" width="3.67951" height="14.7181"/>
+						<rect x="498.074" y="15.832" width="3.16652" height="3.16653"/>
+						<rect x="564.185" y="3.54492" width="3.67931" height="15.4532"/>
+						<rect x="582.57" y="0.599609" width="11.0379" height="3.67933"/>
+						<rect x="578.907" y="4.2793" width="3.67931" height="14.7173"/>
+						<path d="M593.617 4.2793C595.649 4.2793 597.296 5.92658 597.296 7.9586V18.9966H593.617V4.2793Z"/>
+						<rect x="564.185" y="0.599609" width="14.7172" height="3.67933"/>
+						<rect x="534.777" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M538.452 4.27913C538.452 2.24699 540.1 0.599609 542.132 0.599609H556.85V4.27913H538.452Z"/>
+						<path d="M538.452 15.3184H556.85C556.85 17.3505 555.202 18.9979 553.17 18.9979H538.452V15.3184Z"/>
+						<rect x="556.861" y="4.28125" width="3.67951" height="11.0386"/>
+						<path d="M531.121 0.601562V4.28125H509.05V15.3193C507.018 15.3193 505.371 13.6725 505.371 11.6406V0.601562H531.121Z"/>
+						<rect x="509.049" y="15.3184" width="22.0771" height="3.67952"/>
+					</svg>
+				</Wrapped>
+			</a>
+		</li>
+		<li class="lg:justify-self-end">
+			<a href="#">Horde Agence E.I.</a>
+		</li>
+		<li class="lg:col-start-1 lg:row-start-1 lg:justify-self-start">
+			<a href="#">Politique Des Cookies</a>
+		</li>
+	</ul>
+</footer>
+
+===== ./src/components/ContactForm.astro =====
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<form id="contact-form" class=`${className} flex flex-col gap-8 md:gap-16 lg:max-w-[1100px]`>
+	<div class="flex flex-col gap-8">
+		<label for="name">1/ Votre nom & prénom *</label>
+		<input 
+			class="px-2.5 py-2.5 border border-labels"
+			type="text" 
+			id="name" 
+			name="name" 
+			placeholder="Entrez votre nom complet" 
+			required 
+		/>
+	</div>
+
+	<div class="flex flex-col gap-8">
+		<label for="email">2/ Votre email *</label>
+		<input 
+			class="px-2.5 py-2.5 border border-labels"
+			type="email" 
+			id="email" 
+			name="email" 
+			placeholder="Entrez votre adresse email" 
+			required 
+		/>
+	</div>
+
+	<div class="flex flex-col gap-8">
+		<label for="message">3/ Rédigez votre demande *</label>
+		<textarea 
+			class="px-2.5 py-2.5 border border-labels"
+			id="message" 
+			name="message" 
+			placeholder="Votre message" 
+			required
+			rows="6"
+		></textarea>
+	</div>
+
+	<div class="flex flex-col gap-8 lg:flex-row lg:justify-between">
+		<div class="form-field">
+			<label class="checkbox-label flex items-start">
+				<input
+					class="mt-1.5"
+					type="checkbox" 
+					id="marketing" 
+					name="marketing" 
+				/>
+				<span class="block pl-4">Je donne mon accord pour l'envoi de communications marketing.</span>
+			</label>
+		</div>
+		
+		<button type="submit" class="leading-none px-2.5 py-4 bg-fond text-fonddark uppercase tracking-wider lg:px-10 lg:py-6 ">Transmettre</button>
+	</div>
+</form>
+
+<script>
+	const form = document.getElementById('contact-form') as HTMLFormElement;
+
+	form?.addEventListener('submit', (e) => {
+		e.preventDefault();
+		
+		const formData = new FormData(form);
+		const data = {
+			name: formData.get('name'),
+			email: formData.get('email'),
+			message: formData.get('message'),
+			marketing: formData.get('marketing') === 'on'
+		};
+		
+		console.log('Form submitted:', data);
+		
+		// Ici tu pourras ajouter l'envoi vers ton backend
+		// fetch('/api/contact', { method: 'POST', body: JSON.stringify(data) })
+	});
+</script>
+
+===== ./src/components/TextLink.astro =====
+---
+interface Props {
+	href: string;
+	before?: string;
+	class?: string;
+}
+
+const { href, before = '', class: className = '' } = Astro.props;
+---
+
+<a href={href} class={`text-link ${className}`} data-before={before}>
+	<slot />
+</a>
+
+<style>
+	.text-link {
+		position: relative;
+		text-decoration: none;
+		border-bottom: 1px solid;
+		display: inline-block;
+	}
+
+
+
+	.text-link::before {
+		content: attr(data-before);
+	}
+</style>
+
+===== ./src/components/Container.astro =====
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`mx-4 sm:mx-5 md:mx-20 lg:mx-30 ${className}`}>
+	<slot />
+</div>
+
+===== ./src/components/Header.astro =====
+---
+import Wrapped from './Wrapped.astro';
+import TextLink from './TextLink.astro';
+import Languages from './Languages.astro';
+
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<header class={`fixed top-0 left-0 w-full px-4 py-3 z-10000 sm:px-5 sm:py-5 md:px-10 md:py-8  ${className}`}>
+	<div class="relative">
+		<!-- Mobile/Tablet: 2 elements (logo left, menu right) -->
+		<div class="flex justify-between items-center lg:hidden">
+			<a href="/">
+				<svg width="37" height="13" viewBox="0 0 37 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect x="19.7373" y="2.51758" width="2.43499" height="10.0636"/>
+					<rect x="21.7637" y="5.0332" width="12.9866" height="2.51589"/>
+					<path d="M22.1753 2.51589C22.1753 1.1264 23.3017 0 24.6912 0H34.3502V2.51589H22.1753Z"/>
+					<rect x="34.3499" y="2.51758" width="2.43499" height="10.0636"/>
+					<path d="M0.00341797 0H2.43841V5.03178C1.0936 5.03178 0.00341797 3.9416 0.00341797 2.59679V0Z"/>
+					<path d="M14.6162 0H17.0512V2.59679C17.0512 3.9416 15.961 5.03178 14.6162 5.03178V0Z"/>
+					<path d="M17.0449 6.62793H17.0459V12.582H14.6104V7.55078H2.43555V12.582H0V5.03516H17.0449V6.62793Z"/>
+				</svg>
+			</a>
+			<Wrapped padding='0.75rem' device='all' class='text-[0.875rem]'>
+				<button id="lang-toggle">
+					<span id="current-lang">Langues</span>
+				</button>
+			</Wrapped>
+		</div>
+
+		<div class="hidden lg:grid grid-cols-3 items-center">
+			<div class="justify-self-start">
+				<TextLink href="/#" before='↘ '>Travaillez avec nous</TextLink>
+			</div>
+			<div class="justify-self-center">
+				<Wrapped padding='1.375rem' device='lg'>
+					<svg width="57" height="19" viewBox="0 0 57 19" xmlns="http://www.w3.org/2000/svg">
+						<g clip-path="url(#clip0_556_5351)">
+						<path d="M0.00534019 5.90862e-07H3.77348V7.59944C1.6924 7.59944 0.00534019 5.95295 0.00534019 3.92191V5.90862e-07Z"/>
+						<path d="M22.6185 0H26.3866V3.9219C26.3866 5.95295 24.6996 7.59944 22.6185 7.59944V0Z"/>
+						<path d="M26.3776 19H22.61V11.4023H3.76847V19H0V7.60261H26.3768L26.3776 19Z"/>
+						<path d="M30.6187 3.80101H34.3868V18.9999H30.6187V3.80101Z"/>
+						<path d="M33.7545 7.60023H53.8513V11.4H33.7545V7.60023Z"/>
+						<path d="M34.3918 3.79972C34.3918 1.70119 36.1349 0 38.2851 0H53.2325V3.79972H34.3918Z"/>
+						<path d="M53.2319 3.80101H57V18.9999H53.2319V3.80101Z"/>
+						</g>
+						<defs>
+						<clipPath id="clip0_556_5351">
+						<rect width="57" height="19" fill="white"/>
+						</clipPath>
+						</defs>
+					</svg>
+
+				</Wrapped>
+			</div>
+			<div class="justify-self-end">
+				<Wrapped padding='0.75rem' device='lg' class='text-[0.875rem]'>
+					<button id="lang-toggle">
+						<span id="current-lang">Langues</span>
+					</button>
+				</Wrapped>
+			</div>
+		</div>
+		<Languages class='fixed right-0 mt-2 mr-4 flex flex-col items-end gap-2 sm:mr-5 md:mr-10'></Languages>
+	</div>
+</header>
+
+
+<script>
+	const langToggle = document.getElementById('lang-toggle');
+	const langDropdown = document.getElementById('lang-dropdown');
+
+	langToggle?.addEventListener('click', () => {
+		langDropdown?.classList.toggle('hidden');
+	});
+
+	// Close dropdown when clicking outside
+	document.addEventListener('click', (e) => {
+		const target = e.target as Node;
+		if (!langToggle?.contains(target) && !langDropdown?.contains(target)) {
+			langDropdown?.classList.add('hidden');
+		}
+	});
+</script>
+
+
+===== ./src/components/Weather.astro =====
+---
+import Wrapped from './Wrapped.astro';
+
+interface Props
+{
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`flex items-center gap-1.5 w-full ${className}`}>
+	<div id="time-display" class="whitespace-nowrap ">Day --:--:--</div>
+	<Wrapped device="all" padding="0.25rem">
+		<div id="weather-display" class="whitespace-nowrap">Chargement...</div>
+	</Wrapped>
+</div>
+
+<script>
+	// Configuration
+	const LAT = 50.8503;
+	const LON = 4.3517;
+	
+	const weatherCodes: Record<number, [string, string]> = {
+		0: ['Ensoleillé', '☀️'],
+		1: ['Partiellement nuageux', '⛅'],
+		2: ['Nuageux', '☁️'],
+		3: ['Couvert', '☁️'],
+		45: ['Brouillard', '🌫️'],
+		48: ['Brouillard givrant', '🌫️'],
+		51: ['Bruine légère', '🌧️'],
+		53: ['Bruine', '🌧️'],
+		55: ['Bruine intense', '🌧️'],
+		61: ['Pluie faible', '🌧️'],
+		63: ['Pluie', '🌧️'],
+		65: ['Pluie forte', '🌧️'],
+		71: ['Neige faible', '❄️'],
+		73: ['Neige', '❄️'],
+		75: ['Neige forte', '❄️'],
+		77: ['Grésil', '❄️'],
+		80: ['Averses', '🌦️'],
+		81: ['Averses modérées', '🌦️'],
+		82: ['Violentes averses', '⛈️'],
+		95: ['Orage', '⚡'],
+		96: ['Orage et grêle', '⛈️'],
+		99: ['Orage violent', '⛈️']
+	};
+
+	const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+	let currentWeatherText = 'Chargement...';
+
+	function formatTime(date: Date): string
+	{
+		const dayName = days[date.getDay()];
+		const hours = date.getHours().toString().padStart(2, '0');
+		const minutes = date.getMinutes().toString().padStart(2, '0');
+		const seconds = date.getSeconds().toString().padStart(2, '0');
+
+		return `${dayName} ${hours}:${minutes}:${seconds}`;
+	}
+
+	async function fetchWeather()
+	{
+		try
+		{
+			const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`);
+			const data = await response.json();
+			
+			const code = data.current_weather.weathercode;
+			const weatherInfo = weatherCodes[code] || ['Indisponible', ''];
+			
+			// On prépare juste la string "Ensoleillé ☀️"
+			currentWeatherText = `${weatherInfo[0]} ${weatherInfo[1]}`;
+		}
+		catch (error)
+		{
+			console.error("Erreur météo:", error);
+			currentWeatherText = "Indisponible";
+		}
+		
+		// Mise à jour immédiate du texte météo après le fetch
+		const weatherEl = document.getElementById('weather-display');
+		if (weatherEl)
+		{
+			weatherEl.innerText = currentWeatherText;
+		}
+	}
+
+	function updateTime()
+	{
+		const timeEl = document.getElementById('time-display');
+		if (timeEl)
+		{
+			const now = new Date();
+			timeEl.innerText = formatTime(now);
+		}
+	}
+
+	function init()
+	{
+		fetchWeather();
+		updateTime();
+		
+		// Horloge : toutes les secondes
+		setInterval(updateTime, 1000);
+		
+		// Météo : toutes les 15 minutes
+		setInterval(fetchWeather, 1000 * 60 * 15);
+	}
+
+	init();
+</script>
+
+===== ./src/components/ImageRow.astro =====
+---
+interface Props {
+	span?: 1 | 2;
+	class?: string;
+}
+
+const { span = 1, class: className = '' } = Astro.props;
+const spanClass = span === 2 ? 'col-span-2' : 'col-span-1';
+---
+
+<div class={`${spanClass} ${className}`}>
+	<slot />
+</div>
+
+===== ./src/components/Carousel.astro =====
+---
+interface Props {
+	text: string;
+	textColor?: string;
+	speed?: number;
+	fontSize?: string;
+	class?: string;
+}
+
+const { 
+	text, 
+	textColor = 'text-white', 
+	speed = 5, 
+	class: className = '' 
+} = Astro.props;
+---
+
+<div class={`carousel-container w-screen overflow-hidden relative left-1/2 -translate-x-1/2 ${textColor} ${className}`}>
+	<div class="carousel-track" style={`animation-duration: ${speed}s;`}>
+		<span class="carousel-text">{text}</span>
+		<span class="carousel-text">{text}</span>
+		<span class="carousel-text">{text}</span>
+		<span class="carousel-text">{text}</span>
+	</div>
+</div>
+
+<style>
+	.carousel-container {
+		position: relative;
+	}
+
+	.carousel-track {
+		display: flex;
+		gap: 2rem;
+		animation: scroll linear infinite;
+		width: fit-content;
+	}
+
+	.carousel-text {
+		font-family: var(--font-editorial);
+		white-space: nowrap;
+		font-weight: 200;
+		line-height: 1;
+	}
+
+	@keyframes scroll {
+		0% {
+			transform: translateX(0);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+</style>
+
+===== ./src/components/DisplayText.astro =====
+---
+interface Props {
+	tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
+	class?: string;
+}
+
+const { tag: Tag = 'h1', class: className = '' } = Astro.props;
+---
+
+<div class=`relative sm:flex sm:items-center sm:gap-8 ${className} md:max-w-[705px] lg:max-w-[800px] lg:gap-8`>
+	<span class="quote-before absolute left-0 -top-5 sm:static sm:mr-(--line-margin) lg:mr-0">
+		<svg class="sm:hidden" width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M7.20657 2.42398L9.60328 2.42398C9.60328 3.74766 10.6763 4.83185 12 4.83185L12 9.66406L7.20657 9.66406L7.20657 2.42398ZM-3.20727e-07 2.42398L2.39672 2.42398C2.39672 3.75381 3.48002 4.83185 4.80985 4.83185L4.80985 9.66406L-9.53674e-07 9.66406L-3.20727e-07 2.42398ZM9.60328 -0.000368328L12 -0.000368118L12 2.42399L9.60328 2.42398L9.60328 -0.000368328ZM2.39672 -0.000368958L4.80985 -0.000368747L4.80985 2.42398L2.39672 2.42398L2.39672 -0.000368958Z" fill="#101010"/>
+		</svg>
+		<svg class="hidden sm:block" width="16" height="13" viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M9.60876 3.23328L12.8044 3.23328C12.8044 4.99818 14.2351 6.44377 16 6.44377L16 12.8867L9.60875 12.8867L9.60876 3.23328ZM-1.06342e-06 3.23328L3.19562 3.23328C3.19562 5.00638 4.64003 6.44376 6.41313 6.44376L6.41313 12.8867L-1.90735e-06 12.8867L-1.06342e-06 3.23328ZM12.8044 0.000811297L16 0.000811577L16 3.23328L12.8044 3.23328L12.8044 0.000811297ZM3.19562 0.000810457L6.41313 0.000810739L6.41313 3.23328L3.19562 3.23328L3.19562 0.000810457Z" fill="#101010"/>
+		</svg>
+	</span>
+	<Tag class={`font-editorial text-center font-[200] text-[1.25rem] leading-[1.4] sm:text-[1.875rem] 2xl:text-[2.25rem] 2xl:leading-[2.8125rem]`}>
+		<slot />
+	</Tag>
+	<span class="quote-after absolute right-0 -top-5 sm:static sm:ml-(--line-margin) lg:ml-0">
+		<svg class="sm:hidden" width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M4.79343 7.49147L2.39672 7.49147C2.39672 6.12184 1.32367 5 0 5L0 0L4.79343 0L4.79343 7.49147ZM12 7.49147L9.60328 7.49147C9.60328 6.11547 8.51998 5 7.19015 5L7.19015 0L12 0L12 7.49147ZM2.39672 10H0L0 7.49147H2.39672L2.39672 10ZM9.60328 10L7.19015 10V7.49147H9.60328V10Z" fill="#101010"/>
+		</svg>
+		<svg class="hidden sm:block" width="16" height="13" viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path d="M6.39124 9.73891H3.19562C3.19562 7.95839 1.76489 6.5 0 6.5V0H6.39124V9.73891ZM16 9.73891H12.8044C12.8044 7.95011 11.36 6.5 9.58687 6.5V0H16V9.73891ZM3.19562 13H0V9.73891H3.19562V13ZM12.8044 13H9.58687V9.73891H12.8044V13Z" fill="#101010"/>
+		</svg>
+	</span>
+</div>
+
+===== ./src/components/ImageContainer.astro =====
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div id="imgContainer" class={`grid grid-cols-2 ${className}`}>
+	<slot />
+</div>
+
+===== ./src/layouts/Layout.astro =====
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
+
+interface Props {
+	title?: string;
+	theme?: 'light' | 'dark';
+}
+
+const { title = 'Horde', theme = 'light' } = Astro.props;
+const themeClass = theme === 'dark' ? 'bg-fonddark text-white [&_svg]:fill-white' : 'bg-fond text-fonddark [&_svg]:fill-fonddark';
+---
+
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class={themeClass}>
+		<Header></Header>
+		<span class=`${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} hidden xl:block fixed h-full w-px top-0 left-(--line-margin) -z-10000`></span>
+		<span class=`fixed h-full w-px md:w-10 md:border-x top-0 left-(--line-margin) xl:left-[calc(2*var(--line-margin))] ${theme === 'dark' ? 'bg-outlinedark md:border-outlinedark' : 'bg-outline md:border-outline'} md:bg-transparent -z-10000`></span>
+		<slot />
+		<span class=`fixed h-full w-px md:w-10 md:border-x top-0 right-(--line-margin) xl:right-[calc(2*var(--line-margin))] ${theme === 'dark' ? 'bg-outlinedark md:border-outlinedark' : 'bg-outline md:border-outline'} md:bg-transparent -z-10000`></span>
+		<span class=`${theme === 'dark' ? 'bg-outlinedark' : 'bg-outline'} hidden xl:block fixed h-full w-px top-0 right-(--line-margin) -z-10000`></span>
+
+	</body>
+</html>
