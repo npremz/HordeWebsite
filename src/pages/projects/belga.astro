@@ -12,8 +12,31 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 <Layout title="Horde - Contact">
 	<Container>
 		<main>
-			<section class="relative mx-(--line-margin) lg:mx-20">
-				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] xl:mt-88 2xl:text-[12rem]" text="Étude de cas (Café Belga - Projet fictif)" speed={20} textColor="#010101"></Carousel>
+			<section class="relative mx-(--line-margin) lg:mx-20 2xl:mx-48 2xl:max-w-[1880px]">
+				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] xl:mt-88 2xl:text-[12rem]" speed={20} textColor="#010101">
+					Étude de cas (Café Belga 
+					<svg class="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10 xl:h-12 xl:w-12 2xl:h-15 2xl:w-15 lg:mx-2 2xl:mx-4" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2.98488 9.03125C4.6335 9.03125 5.96997 10.3682 5.96997 12.0168L2.98488 12.0168L2.98488 9.03125Z" fill="#101010"/>
+						<path d="M11.9399 9.03125C10.2913 9.03125 8.95483 10.3682 8.95483 12.0168L11.9399 12.0168L11.9399 9.03125Z" fill="#101010"/>
+						<rect y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="5.97095" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M2.98462 3.05078L5.96971 3.05078V4.24294C5.96971 5.23342 5.16676 6.03637 4.17628 6.03637H2.98462L2.98462 3.05078Z" fill="#101010"/>
+						<rect x="5.97095" y="12.0156" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="11.9402" y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M8.95483 3.05078L11.9399 3.05078V6.03637C10.2913 6.03637 8.95483 4.6994 8.95483 3.05078Z" fill="#101010"/>
+					</svg>
+					Projet fictif
+					<svg <svg class="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10 xl:h-12 xl:w-12 2xl:h-15 2xl:w-15 lg:mx-2 2xl:mx-4" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2.98488 9.03125C4.6335 9.03125 5.96997 10.3682 5.96997 12.0168L2.98488 12.0168L2.98488 9.03125Z" fill="#101010"/>
+						<path d="M11.9399 9.03125C10.2913 9.03125 8.95483 10.3682 8.95483 12.0168L11.9399 12.0168L11.9399 9.03125Z" fill="#101010"/>
+						<rect y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="5.97095" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M2.98462 3.05078L5.96971 3.05078V4.24294C5.96971 5.23342 5.16676 6.03637 4.17628 6.03637H2.98462L2.98462 3.05078Z" fill="#101010"/>
+						<rect x="5.97095" y="12.0156" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="11.9402" y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M8.95483 3.05078L11.9399 3.05078V6.03637C10.2913 6.03637 8.95483 4.6994 8.95483 3.05078Z" fill="#101010"/>
+					</svg>)
+				</Carousel>
 				<div class="my-10 flex flex-col gap-10 sm:mt-44 sm:mb-20 sm:gap-16 lg:gap-20 lg:mb-24 xl:mt-50 xl:mb-32">
 					<div class="relative flex gap-16 md:w-full md:justify-between md:gap-10">
 						<p class="leading-loose md:max-w-[73%] lg:max-w-[920px]">Nous avons travaillé dans un projet fictif qui était de créer un site web du Café Belga qui serait bien plus qu'un simple site vitrine en ligne: un point de contact stratégique conçu pour transmettre les valeurs, l'esthétique et la vision de la marque. La conception UX/UI a mis l'accent sur la simplicité, la réactivité et la cohérence visuelle. Construite sur React, la plateforme comprend des fonctionnalités avancées permettant de gérer un système de réservation, les dates des prochains évenements et la carte des différents produits du Café Belga.</p>
@@ -37,39 +60,39 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 					</div>
 				</div>
 				<HorizontalLine class="mt-2"></HorizontalLine>
-				<ImageContainer class="gap-4 -mt-px">
+				<ImageContainer class="gap-4 -mt-px md:gap-6 lg:gap-9 xl:gap-12 2xl:gap-15">
 					<ImageRow span={2}>
-						<img src="../belga1.jpg" alt="">
-					</ImageRow>
-					<ImageRow span={2}>
-						<img src="../belga2.jpg" alt="">
-					</ImageRow>
-					<ImageRow span={1}>
-						<img src="../belga3.jpg" alt="">
-					</ImageRow>
-					<ImageRow span={1}>
-						<img src="../belga4.jpg" alt="">
+						<img src="../belga1.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga5.jpg" alt="">
+						<img src="../belga2.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga6.jpg" alt="">
+						<img src="../belga3.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga7.jpg" alt="">
+						<img src="../belga4.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga8.jpg" alt="">
+						<img src="../belga5.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga9.jpg" alt="">
+						<img src="../belga6.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga10.jpg" alt="">
+						<img src="../belga7.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga11.jpg" alt="">
+						<img src="../belga8.jpg" alt="" class="object-cover w-full">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga9.jpg" alt="" class="object-cover w-full">
+					</ImageRow>
+					<ImageRow span={1}>
+						<img src="../belga10.jpg" alt="" class="object-cover w-full">
+					</ImageRow>
+					<ImageRow span={2}>
+						<img src="../belga11.jpg" alt="" class="object-cover w-full">
 					</ImageRow>
 				</ImageContainer>
 				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16 xl:my-24 xl:gap-24">
@@ -91,7 +114,7 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 							<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
 							<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
 						</svg>
-						<button class="px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider sm:px-10 sm:py-4 sm:w-fit">Voir tout les projets</button>
+						<button class="cursor-pointer px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider sm:px-10 sm:py-4 sm:w-fit">Voir tout les projets</button>
 					</div>
 				</div>
 			</section>

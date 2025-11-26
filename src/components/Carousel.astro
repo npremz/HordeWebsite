@@ -1,32 +1,34 @@
 ---
 interface Props {
-	text: string;
 	textColor?: string;
 	speed?: number;
-	fontSize?: string;
 	class?: string;
 }
 
 const { 
-	text, 
 	textColor = 'text-white', 
 	speed = 5, 
 	class: className = '' 
 } = Astro.props;
 ---
 
-<div class={`carousel-container w-screen overflow-hidden relative left-1/2 -translate-x-1/2 ${textColor} ${className}`}>
-	<div class="carousel-track" style={`animation-duration: ${speed}s;`}>
-		<span class="carousel-text">{text}</span>
-		<span class="carousel-text">{text}</span>
-		<span class="carousel-text">{text}</span>
-		<span class="carousel-text">{text}</span>
+<div class={`carousel-container w-screen overflow-hidden left-1/2 -translate-x-1/2 ${textColor} ${className}`}>
+	<div class="carousel-track" style={`--carousel-speed: ${speed}s; animation-duration: ${speed}s;`}>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
 	</div>
 </div>
 
 <style>
 	.carousel-container {
 		position: relative;
+		padding: 0.5rem 0;
 	}
 
 	.carousel-track {
@@ -36,11 +38,32 @@ const {
 		width: fit-content;
 	}
 
+	@media only screen and (min-width: 64rem) {
+		.carousel-track {
+			animation-duration: calc(var(--carousel-speed) * 1.5) !important;
+		}
+	}
+
+	@media only screen and (min-width: 95rem) {
+		.carousel-track {
+			animation-duration: calc(var(--carousel-speed) * 2) !important;
+		}
+	}
+
+	@media only screen and (min-width: 120rem) {
+		.carousel-track {
+			animation-duration: calc(var(--carousel-speed) * 2.5) !important;
+		}
+	}
+
 	.carousel-text {
 		font-family: var(--font-editorial);
 		white-space: nowrap;
 		font-weight: 200;
 		line-height: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	@keyframes scroll {
@@ -48,7 +71,7 @@ const {
 			transform: translateX(0);
 		}
 		100% {
-			transform: translateX(-50%);
+			transform: translateX(-25%);
 		}
 	}
 </style>

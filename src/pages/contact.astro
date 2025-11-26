@@ -12,9 +12,12 @@ import ContactForm from "../components/ContactForm.astro";
 	<Container>
 		<main>
 			<section class="relative h-halfscreen flex flex-col items-center xl:h-[70svh]">
-				<span class="absolute h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
+				<span class="absolute  h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
 
-				<Carousel text="Restons en contact" class="top-1/2 -translate-y-1/2 text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]"></Carousel>
+				<Carousel class="top-1/2 left-0! translate-x-0! -translate-y-1/2 z-10 text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]">
+					Restons en contact
+					→
+				</Carousel>
 				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24 md:-translate-y-28 lg:-translate-y-32">
 					↓
 				</Wrapped>
@@ -26,3 +29,54 @@ import ContactForm from "../components/ContactForm.astro";
 		<Footer class="mt-12 md:mt-20"></Footer>
 	</Container>
 </Layout>
+
+<script>
+	const form = document.getElementById('contact-form') as HTMLFormElement;
+	const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+	form?.addEventListener('submit', async (e) =>
+	{
+		e.preventDefault();
+		
+		const formData = new FormData(form);
+		const data = {
+			name: formData.get('name'),
+			email: formData.get('email'),
+			message: formData.get('message'),
+			marketing: formData.get('marketing') === 'on'
+		};
+
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Envoi en cours...';
+
+		try
+		{
+			const response = await fetch('/api/contact', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data)
+			});
+
+			const result = await response.json();
+
+			if (result.success)
+			{
+				form.reset();
+				alert('Message envoyé avec succès !');
+			}
+			else
+			{
+				alert('Erreur : ' + result.error);
+			}
+		}
+		catch (error)
+		{
+			alert('Erreur lors de l\'envoi du message');
+		}
+		finally
+		{
+			submitBtn.disabled = false;
+			submitBtn.textContent = 'Transmettre';
+		}
+	});
+</script>

@@ -25,44 +25,49 @@ const { class: className = '' } = Astro.props;
 					<path d="M17.0449 6.62793H17.0459V12.582H14.6104V7.55078H2.43555V12.582H0V5.03516H17.0449V6.62793Z"/>
 				</svg>
 			</a>
-			<Wrapped padding='0.75rem' device='all' class='text-[0.875rem]'>
-				<button id="lang-toggle">
-					<span id="current-lang">Langues</span>
-				</button>
-			</Wrapped>
+			<a href="/contact" class="cursor-pointer">
+				<Wrapped padding='0.75rem' device='all' class='text-[0.875rem]'>
+					<button id="lang-toggle" class="cursor-pointer">
+						<span id="current-lang">Contact</span>
+					</button>
+				</Wrapped>
+			</a>
 		</div>
 
 		<div class="hidden lg:grid grid-cols-3 items-center">
 			<div class="justify-self-start">
-				<TextLink href="/#" before='↘ '>Travaillez avec nous</TextLink>
+				<TextLink href="/contact" before='↘ '>Travaillez avec nous</TextLink>
 			</div>
 			<div class="justify-self-center">
-				<Wrapped padding='1.375rem' device='lg'>
-					<svg width="57" height="19" viewBox="0 0 57 19" xmlns="http://www.w3.org/2000/svg">
-						<g clip-path="url(#clip0_556_5351)">
-						<path d="M0.00534019 5.90862e-07H3.77348V7.59944C1.6924 7.59944 0.00534019 5.95295 0.00534019 3.92191V5.90862e-07Z"/>
-						<path d="M22.6185 0H26.3866V3.9219C26.3866 5.95295 24.6996 7.59944 22.6185 7.59944V0Z"/>
-						<path d="M26.3776 19H22.61V11.4023H3.76847V19H0V7.60261H26.3768L26.3776 19Z"/>
-						<path d="M30.6187 3.80101H34.3868V18.9999H30.6187V3.80101Z"/>
-						<path d="M33.7545 7.60023H53.8513V11.4H33.7545V7.60023Z"/>
-						<path d="M34.3918 3.79972C34.3918 1.70119 36.1349 0 38.2851 0H53.2325V3.79972H34.3918Z"/>
-						<path d="M53.2319 3.80101H57V18.9999H53.2319V3.80101Z"/>
-						</g>
-						<defs>
-						<clipPath id="clip0_556_5351">
-						<rect width="57" height="19" fill="white"/>
-						</clipPath>
-						</defs>
-					</svg>
-
-				</Wrapped>
+				<a href="/">
+					<Wrapped padding='1.375rem' device='lg'>
+						<svg width="57" height="19" viewBox="0 0 57 19" xmlns="http://www.w3.org/2000/svg">
+							<g clip-path="url(#clip0_556_5351)">
+							<path d="M0.00534019 5.90862e-07H3.77348V7.59944C1.6924 7.59944 0.00534019 5.95295 0.00534019 3.92191V5.90862e-07Z"/>
+							<path d="M22.6185 0H26.3866V3.9219C26.3866 5.95295 24.6996 7.59944 22.6185 7.59944V0Z"/>
+							<path d="M26.3776 19H22.61V11.4023H3.76847V19H0V7.60261H26.3768L26.3776 19Z"/>
+							<path d="M30.6187 3.80101H34.3868V18.9999H30.6187V3.80101Z"/>
+							<path d="M33.7545 7.60023H53.8513V11.4H33.7545V7.60023Z"/>
+							<path d="M34.3918 3.79972C34.3918 1.70119 36.1349 0 38.2851 0H53.2325V3.79972H34.3918Z"/>
+							<path d="M53.2319 3.80101H57V18.9999H53.2319V3.80101Z"/>
+							</g>
+							<defs>
+							<clipPath id="clip0_556_5351">
+							<rect width="57" height="19" fill="white"/>
+							</clipPath>
+							</defs>
+						</svg>
+					</Wrapped>
+				</a>
 			</div>
 			<div class="justify-self-end">
-				<Wrapped padding='0.75rem' device='lg' class='text-[0.875rem]'>
-					<button id="lang-toggle">
-						<span id="current-lang">Langues</span>
-					</button>
-				</Wrapped>
+				<a href="/contact" class="cursor-pointer">
+					<Wrapped padding='0.75rem' device='lg' class='text-[0.875rem]'>
+						<button id="lang-toggle" class="cursor-pointer">
+							<span id="current-lang">Contact</span>
+						</button>
+					</Wrapped>
+				</a>
 			</div>
 		</div>
 		<Languages class='fixed right-0 mt-2 mr-4 flex flex-col items-end gap-2 sm:mr-5 md:mr-10'></Languages>
@@ -71,19 +76,19 @@ const { class: className = '' } = Astro.props;
 
 
 <script>
-	const langToggle = document.getElementById('lang-toggle');
-	const langDropdown = document.getElementById('lang-dropdown');
+	// const langToggle = document.getElementById('lang-toggle');
+	// const langDropdown = document.getElementById('lang-dropdown');
 
-	langToggle?.addEventListener('click', () => {
-		langDropdown?.classList.toggle('hidden');
-	});
+	// langToggle?.addEventListener('click', () => {
+	// 	langDropdown?.classList.toggle('hidden');
+	// });
 
-	// Close dropdown when clicking outside
-	document.addEventListener('click', (e) => {
-		const target = e.target as Node;
-		if (!langToggle?.contains(target) && !langDropdown?.contains(target)) {
-			langDropdown?.classList.add('hidden');
-		}
-	});
+	// // Close dropdown when clicking outside
+	// document.addEventListener('click', (e) => {
+	// 	const target = e.target as Node;
+	// 	if (!langToggle?.contains(target) && !langDropdown?.contains(target)) {
+	// 		langDropdown?.classList.add('hidden');
+	// 	}
+	// });
 </script>
 
