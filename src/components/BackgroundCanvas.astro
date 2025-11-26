@@ -37,6 +37,7 @@ const {
 
   let animationId: number | null = null;
   let resizeTimeout: number | undefined;
+  let lastWidth = window.innerWidth;
   
   let pixels: { x: number; y: number; alpha: number }[] = [];
 
@@ -60,7 +61,6 @@ const {
   }
   
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
   
   function getProjectSectionPosition(): number | null {
     const projectSection = document.getElementById(targetId);
@@ -196,12 +196,16 @@ const {
   
 	window.addEventListener('resize', () =>
 	{
+		const currentWidth = window.innerWidth;
+		if (currentWidth === lastWidth) return; // Ignore si la largeur n'a pas changé
+		
+		lastWidth = currentWidth;
 		clearTimeout(resizeTimeout);
 		
 		resizeTimeout = setTimeout(() =>
 		{
-			pixels = [];
 			resizeCanvas();
+			pixels = [];
 		}, 200);
 	});
 
