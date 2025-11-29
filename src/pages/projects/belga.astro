@@ -8,6 +8,18 @@ import HorizontalLine from '../../components/HorizontalLine.astro';
 import ImageContainer from '../../components/ImageContainer.astro';
 import ImageRow from '../../components/ImageRow.astro';
 import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
+import { Image } from 'astro:assets';
+import belga1 from '../../assets/belga1.jpg';
+import belga2 from '../../assets/belga2.jpg';
+import belga3 from '../../assets/belga3.jpg';
+import belga4 from '../../assets/belga4.jpg';
+import belga5 from '../../assets/belga5.jpg';
+import belga6 from '../../assets/belga6.jpg';
+import belga7 from '../../assets/belga7.jpg';
+import belga8 from '../../assets/belga8.jpg';
+import belga9 from '../../assets/belga9.jpg';
+import belga10 from '../../assets/belga10.jpg';
+import belga11 from '../../assets/belga11.jpg';
 ---
 <Layout 
 	title="Horde - Belga project"
@@ -66,37 +78,37 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 				<HorizontalLine class="mt-2"></HorizontalLine>
 				<ImageContainer class="gap-4 -mt-px md:gap-6 lg:gap-9 xl:gap-12 2xl:gap-15">
 					<ImageRow span={2}>
-						<img src="../belga1.jpg" alt="Vue de la page d'accueil lumineuse du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga1} alt="Vue de la page d'accueil lumineuse du Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga2.jpg" alt="Présentation détaillée de la carte du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga2} alt="Présentation détaillée de la carte du Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga3.jpg" alt="Prototype mobile du parcours client Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga3} alt="Prototype mobile du parcours client Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga4.jpg" alt="Zoom typographique sur l'identité Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga4} alt="Zoom typographique sur l'identité Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga5.jpg" alt="Interface desktop responsive du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga5} alt="Interface desktop responsive du Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga6.jpg" alt="Écran de réservation du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga6} alt="Écran de réservation du Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga7.jpg" alt="Module listant les évènements du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga7} alt="Module listant les évènements du Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga8.jpg" alt="Styleguide du projet Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga8} alt="Styleguide du projet Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga9.jpg" alt="Moodboard photographique Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga9} alt="Moodboard photographique Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga10.jpg" alt="Ambiance du coffee shop Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga10} alt="Ambiance du coffee shop Café Belga" class="object-cover w-full" />
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga11.jpg" alt="Présentation finale du projet Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
+						<Image src={belga11} alt="Présentation finale du projet Café Belga" class="object-cover w-full" />
 					</ImageRow>
 				</ImageContainer>
 				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16 xl:my-24 xl:gap-24">
