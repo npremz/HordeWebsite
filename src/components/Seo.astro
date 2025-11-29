@@ -1,0 +1,34 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  noIndex?: boolean;
+}
+
+const { title, description, image = '/favicon.svg', noIndex = false } = Astro.props;
+const pathname = `${Astro.url.pathname}${Astro.url.search ?? ''}`;
+const canonical = Astro.site ? new URL(pathname, Astro.site).toString() : undefined;
+const imageUrl = image.startsWith('http')
+  ? image
+  : Astro.site
+    ? new URL(image, Astro.site).toString()
+    : image;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{canonical && <link rel="canonical" href={canonical} />}
+{canonical && <link rel="alternate" hrefLang="fr" href={canonical} />}
+{canonical && <link rel="alternate" hrefLang="x-default" href={canonical} />}
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+{canonical && <meta property="og:url" content={canonical} />}
+<meta property="og:image" content={imageUrl} />
+<meta property="og:locale" content="fr_FR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+{noIndex && <meta name="robots" content="noindex, nofollow" />}

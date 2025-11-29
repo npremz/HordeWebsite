@@ -9,8 +9,12 @@ import ImageContainer from '../../components/ImageContainer.astro';
 import ImageRow from '../../components/ImageRow.astro';
 import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 ---
-<Layout title="Horde - Belga project">
+<Layout 
+	title="Horde - Belga project"
+	description="Étude de cas fictive du Café Belga réalisée par Horde : identité digitale, UX/UI et développement web."
+>
 	<Container>
+		<h1 class="sr-only">Étude de cas Café Belga par Horde</h1>
 		<main>
 			<section class="relative mx-(--line-margin) lg:mx-20 2xl:mx-48 2xl:max-w-[1880px]">
 				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] xl:mt-88 2xl:text-[12rem]" speed={20} textColor="#010101">
@@ -62,37 +66,37 @@ import BackgroundCanvas from '../../components/BackgroundCanvas.astro';
 				<HorizontalLine class="mt-2"></HorizontalLine>
 				<ImageContainer class="gap-4 -mt-px md:gap-6 lg:gap-9 xl:gap-12 2xl:gap-15">
 					<ImageRow span={2}>
-						<img src="../belga1.jpg" alt="" class="object-cover w-full">
+						<img src="../belga1.jpg" alt="Vue de la page d'accueil lumineuse du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga2.jpg" alt="" class="object-cover w-full">
+						<img src="../belga2.jpg" alt="Présentation détaillée de la carte du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga3.jpg" alt="" class="object-cover w-full">
+						<img src="../belga3.jpg" alt="Prototype mobile du parcours client Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga4.jpg" alt="" class="object-cover w-full">
+						<img src="../belga4.jpg" alt="Zoom typographique sur l'identité Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga5.jpg" alt="" class="object-cover w-full">
+						<img src="../belga5.jpg" alt="Interface desktop responsive du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga6.jpg" alt="" class="object-cover w-full">
+						<img src="../belga6.jpg" alt="Écran de réservation du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga7.jpg" alt="" class="object-cover w-full">
+						<img src="../belga7.jpg" alt="Module listant les évènements du Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga8.jpg" alt="" class="object-cover w-full">
+						<img src="../belga8.jpg" alt="Styleguide du projet Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga9.jpg" alt="" class="object-cover w-full">
+						<img src="../belga9.jpg" alt="Moodboard photographique Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={1}>
-						<img src="../belga10.jpg" alt="" class="object-cover w-full">
+						<img src="../belga10.jpg" alt="Ambiance du coffee shop Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 					<ImageRow span={2}>
-						<img src="../belga11.jpg" alt="" class="object-cover w-full">
+						<img src="../belga11.jpg" alt="Présentation finale du projet Café Belga" class="object-cover w-full" loading="lazy" decoding="async">
 					</ImageRow>
 				</ImageContainer>
 				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16 xl:my-24 xl:gap-24">

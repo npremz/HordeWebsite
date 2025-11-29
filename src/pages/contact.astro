@@ -8,8 +8,13 @@ import HorizontalLine from '../components/HorizontalLine.astro';
 import ContactForm from "../components/ContactForm.astro";
 ---
 
-<Layout title="Horde - Contact" theme="dark">
+<Layout 
+	title="Horde - Contact"
+	description="Échangez avec l'équipe Horde pour imaginer votre prochain projet digital."
+	theme="dark"
+>
 	<Container>
+		<h1 class="sr-only">Contactez l'agence Horde</h1>
 		<main>
 			<section class="relative h-halfscreen flex flex-col items-center xl:h-[70svh]">
 				<span class="absolute  h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
@@ -30,53 +35,64 @@ import ContactForm from "../components/ContactForm.astro";
 	</Container>
 </Layout>
 
-<script>
-	const form = document.getElementById('contact-form') as HTMLFormElement;
-	const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+<script type="module">
+	if (typeof window !== 'undefined') {
+		const registerFormHandling = () => {
+			const form = document.getElementById('contact-form');
+			if (!(form instanceof HTMLFormElement)) return;
+			const submitBtn = form.querySelector('button[type="submit"]');
 
-	form?.addEventListener('submit', async (e) =>
-	{
-		e.preventDefault();
-		
-		const formData = new FormData(form);
-		const data = {
-			name: formData.get('name'),
-			email: formData.get('email'),
-			message: formData.get('message'),
-			marketing: formData.get('marketing') === 'on'
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				const formData = new FormData(form);
+				const data = {
+					name: formData.get('name'),
+					email: formData.get('email'),
+					message: formData.get('message'),
+					marketing: formData.get('marketing') === 'on'
+				};
+
+				if (submitBtn instanceof HTMLButtonElement) {
+					submitBtn.disabled = true;
+					submitBtn.textContent = 'Envoi en cours...';
+				}
+
+				try {
+					const response = await fetch('/api/contact', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(data)
+					});
+
+					const result = await response.json();
+
+					if (result.success) {
+						form.reset();
+						alert('Message envoyé avec succès !');
+					} else {
+						alert('Erreur : ' + result.error);
+					}
+				} catch (error) {
+					alert('Erreur lors de l\'envoi du message');
+				} finally {
+					if (submitBtn instanceof HTMLButtonElement) {
+						submitBtn.disabled = false;
+						submitBtn.textContent = 'Transmettre';
+					}
+				}
+			});
 		};
 
-		submitBtn.disabled = true;
-		submitBtn.textContent = 'Envoi en cours...';
+		const schedule = () => {
+			const idle = window.requestIdleCallback || ((cb) => window.setTimeout(cb, 0));
+			idle(registerFormHandling);
+		};
 
-		try
-		{
-			const response = await fetch('/api/contact', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(data)
-			});
-
-			const result = await response.json();
-
-			if (result.success)
-			{
-				form.reset();
-				alert('Message envoyé avec succès !');
-			}
-			else
-			{
-				alert('Erreur : ' + result.error);
-			}
+		if (document.readyState === 'complete') {
+			schedule();
+		} else {
+			window.addEventListener('load', schedule, { once: true });
 		}
-		catch (error)
-		{
-			alert('Erreur lors de l\'envoi du message');
-		}
-		finally
-		{
-			submitBtn.disabled = false;
-			submitBtn.textContent = 'Transmettre';
-		}
-	});
+	}
 </script>

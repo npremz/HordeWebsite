@@ -10,7 +10,7 @@ import Weather from '../components/Weather.astro';
 		Agence numérique bruxelloise, nous cultivons une structure à taille humaine pour être au plus près des besoins de nos clients.
 	</DisplayText>
 	<div class="flex flex-col gap-8 items-center mb-20 sm:gap-12 md:w-full lg:gap-20 xl:gap-36">
-		<h1 class="relative w-full z-10 lg:flex lg:flex-col lg:items-center">
+		<div class="relative w-full z-10 lg:flex lg:flex-col lg:items-center" role="presentation" aria-hidden="true">
 			<svg class="w-full lg:max-w-[85%]" viewBox="0 0 290 68" fill="none" xmlns="http://www.w3.org/2000/svg">
 				<path d="M228.321 43.0708C228.321 39.663 231.084 36.9004 234.491 36.9004H265.343V43.0708H228.321Z" fill="#101010"/>
 				<rect x="227.908" y="49.2402" width="37.4336" height="6.17037" fill="#101010"/>
@@ -54,7 +54,7 @@ import Weather from '../components/Weather.astro';
 				<rect x="37.022" y="6.16797" width="6.17037" height="24.6815" fill="#101010"/>
 			</svg>
 			<span class="hidden-trick">Agence Horde</span>
-		</h1>
+		</div>
 		<div class="lg:grid grid-cols-3 items-center lg:w-[calc(100%+2*var(--line-margin))] xl:w-[calc(100%+4*var(--line-margin))]">
 			<Weather class="hidden lg:flex lg:justify-self-start"></Weather>
 			<Wrapped device='all' padding='0.625rem' class='lg:justify-self-center'>
