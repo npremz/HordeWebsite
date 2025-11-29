@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro';
+import Footer from '../components/Footer.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+---
+
+<Layout 
+	title="Horde - Politique des cookies"
+	description="Politique d'utilisation des cookies de l'agence Horde."
+>
+	<Container>
+		<main class="mt-32 mb-20 mx-(--line-margin) md:mt-48 lg:mx-20 xl:mx-48">
+			<h1 class="text-[2.25rem] leading-none mb-12 font-editorial sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]">Politique des cookies</h1>
+			
+			<div class="flex flex-col gap-10 text-lg leading-relaxed opacity-80 max-w-3xl">
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">1. Qu'est-ce qu'un cookie ?</h2>
+					<p>
+						Un cookie est un petit fichier texte déposé sur votre terminal (ordinateur, tablette ou mobile) lors de la visite d'un site internet. Il permet à son émetteur d'identifier le terminal dans lequel il est enregistré, pendant la durée de validité ou d'enregistrement du cookie.
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">2. Les cookies que nous utilisons</h2>
+					<p class="mb-4">
+						Le site de l'agence Horde utilise uniquement des cookies strictement nécessaires au bon fonctionnement du site. Ces cookies ne nécessitent pas votre consentement préalable.
+					</p>
+					<ul class="list-disc pl-5 space-y-2">
+						<li>
+							<strong>Cookies techniques :</strong> Ces cookies sont indispensables à la navigation sur notre site et à l'utilisation des fonctionnalités principales (comme l'affichage correct du site selon votre appareil).
+						</li>
+						<li>
+							<strong>Cookies de performance (anonymes) :</strong> Nous pouvons utiliser des outils de mesure d'audience respectueux de la vie privée qui ne collectent pas de données personnelles identifiables.
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">3. Gestion des cookies</h2>
+					<p>
+						Bien que les cookies que nous utilisons soient essentiels, vous pouvez à tout moment configurer votre navigateur pour refuser les cookies. Cependant, cela pourrait altérer votre expérience utilisateur sur notre site.
+					</p>
+					<p class="mt-2">
+						La configuration de chaque navigateur est différente. Elle est décrite dans le menu d'aide de votre navigateur, qui vous permettra de savoir de quelle manière modifier vos souhaits en matière de cookies.
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">4. Nous contacter</h2>
+					<p>
+						Pour toute question relative à notre politique de cookies, vous pouvez nous contacter à l'adresse suivante : <a href="mailto:hello@hordeagence.com" class="underline hover:no-underline">hello@hordeagence.com</a>.
+					</p>
+				</section>
+
+				<p class="text-sm mt-8 pt-8 border-t border-outline">
+					Dernière mise à jour : 29 novembre 2025
+				</p>
+			</div>
+		</main>
+		<HorizontalLine></HorizontalLine>
+		<Footer></Footer>
+	</Container>
+</Layout>

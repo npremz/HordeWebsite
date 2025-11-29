@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro';
+import Wrapped from '../components/Wrapped.astro';
+import Footer from '../components/Footer.astro';
+import DisplayText from '../components/DisplayText.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+---
+
+<Layout title="Horde - Page introuvable" description="La page que vous recherchez n'existe pas.">
+	<Container>
+		<main class="relative min-h-[70vh] flex flex-col items-center justify-center text-center gap-8 mt-32">
+			<DisplayText class='mx-[calc(2*var(--line-margin))]' tag='h1'>
+				404
+			</DisplayText>
+			<p class="max-w-md">
+				Oula ! La page que vous cherchez semble ne pas exister.
+			</p>
+			<a href="/">
+				<Wrapped device="all" padding="1rem">
+					Retour à l'accueil
+				</Wrapped>
+			</a>
+		</main>
+		<HorizontalLine class="relative -z-10!"></HorizontalLine>
+		<Footer></Footer>
+	</Container>
+</Layout>
