@@ -6,7 +6,7 @@ interface Props {
   noIndex?: boolean;
 }
 
-const { title, description, image = '/favicon.svg', noIndex = false } = Astro.props;
+const { title, description, image = '/meta.jpg', noIndex = false } = Astro.props;
 const pathname = `${Astro.url.pathname}${Astro.url.search ?? ''}`;
 const canonical = Astro.site ? new URL(pathname, Astro.site).toString() : undefined;
 const imageUrl = image.startsWith('http')
