@@ -2,12 +2,16 @@
 import DisplayText from '../components/DisplayText.astro';
 import Wrapped from '../components/Wrapped.astro';
 import Weather from '../components/Weather.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <section class='relative h-svh flex flex-col justify-between before:content-[""] before:mt-8 md:items-center'>
 	<span class="absolute h-svh w-circles border border-outline -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full"></span>
 	<DisplayText class='mx-[calc(2*var(--line-margin))]' tag='h2'>
-		Agence numérique bruxelloise, nous cultivons une structure à taille humaine pour être au plus près des besoins de nos clients.
+		{t('hero.description')}
 	</DisplayText>
 	<div class="flex flex-col gap-8 items-center mb-20 sm:gap-12 md:w-full lg:gap-20 xl:gap-36">
 		<div class="relative w-full z-10 lg:flex lg:flex-col lg:items-center" role="presentation" aria-hidden="true">
@@ -60,7 +64,7 @@ import Weather from '../components/Weather.astro';
 			<Wrapped device='all' padding='0.625rem' class='lg:justify-self-center'>
 				↓
 			</Wrapped>
-			<p class="hidden lg:block lg:justify-self-end">Agence Numerique Créative</p>
+			<p class="hidden lg:block lg:justify-self-end">{t('hero.subtitle')}</p>
 		</div>
 	</div>
 </section>

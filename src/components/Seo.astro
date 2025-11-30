@@ -7,8 +7,19 @@ interface Props {
 }
 
 const { title, description, image = '/meta.jpg', noIndex = false } = Astro.props;
-const pathname = `${Astro.url.pathname}${Astro.url.search ?? ''}`;
+const pathname = Astro.url.pathname;
+const currentLang = pathname.startsWith('/en') ? 'en' : 'fr';
+
+// Generate canonical URL
 const canonical = Astro.site ? new URL(pathname, Astro.site).toString() : undefined;
+
+// Generate alternate URLs
+const frPath = currentLang === 'en' ? pathname.replace(/^\/en/, '') || '/' : pathname;
+const enPath = currentLang === 'fr' ? `/en${pathname === '/' ? '' : pathname}` : pathname;
+
+const frUrl = Astro.site ? new URL(frPath, Astro.site).toString() : undefined;
+const enUrl = Astro.site ? new URL(enPath, Astro.site).toString() : undefined;
+
 const imageUrl = image.startsWith('http')
   ? image
   : Astro.site
@@ -19,14 +30,17 @@ const imageUrl = image.startsWith('http')
 <title>{title}</title>
 <meta name="description" content={description} />
 {canonical && <link rel="canonical" href={canonical} />}
-{canonical && <link rel="alternate" hrefLang="fr" href={canonical} />}
-{canonical && <link rel="alternate" hrefLang="x-default" href={canonical} />}
+
+{frUrl && <link rel="alternate" hrefLang="fr" href={frUrl} />}
+{enUrl && <link rel="alternate" hrefLang="en" href={enUrl} />}
+{frUrl && <link rel="alternate" hrefLang="x-default" href={frUrl} />}
+
 <meta property="og:type" content="website" />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 {canonical && <meta property="og:url" content={canonical} />}
 <meta property="og:image" content={imageUrl} />
-<meta property="og:locale" content="fr_FR" />
+<meta property="og:locale" content={currentLang === 'fr' ? 'fr_FR' : 'en_US'} />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />

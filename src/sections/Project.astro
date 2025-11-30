@@ -4,19 +4,23 @@ import { Image } from 'astro:assets';
 import work1 from '../assets/work1.jpg';
 import work2 from '../assets/work2.jpg';
 import work3 from '../assets/work3.jpg';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <section id="projects" class="my-60 flex flex-col gap-16 mx-(--line-margin) sm:gap-24 sm:my-80 md:gap-48 md:my-96 xl:gap-60 xl:my-150">
-	<Carousel class='text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]'>Tous Les Projets (03)</Carousel>
+	<Carousel class='text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]'>{t('projects.title')}</Carousel>
 	<div class="relative z-10 flex flex-col items-center gap-16 w-full sm:grid sm:grid-cols-3 sm:items-start">
-		<a href="/projects/belga" class="sm:max-w-full sm:justify-self-start">
-			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work1} alt="Maquette de page d'accueil pour le projet Café Belga" />
+		<a href={lang === 'fr' ? "/projects/belga" : "/en/projects/belga"} class="sm:max-w-full sm:justify-self-start">
+			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work1} alt={t('projects.belga.alt1')} />
 		</a>
-		<a href="/projects/belga" class="sm:max-w-full sm:justify-self-center sm:mt-16 md:mt-24 lg:mt-40 xl:mt-52 2xl:mt-64">
-			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work2} alt="Visuel UI montrant l'expérience mobile du Café Belga" />
+		<a href={lang === 'fr' ? "/projects/belga" : "/en/projects/belga"} class="sm:max-w-full sm:justify-self-center sm:mt-16 md:mt-24 lg:mt-40 xl:mt-52 2xl:mt-64">
+			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work2} alt={t('projects.belga.alt2')} />
 		</a>
-		<a href="/projects/belga" class="sm:max-w-full sm:justify-self-end">
-			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work3} alt="Galerie de visuels créatifs pour Horde" />
+		<a href={lang === 'fr' ? "/projects/belga" : "/en/projects/belga"} class="sm:max-w-full sm:justify-self-end">
+			<Image class="max-w-[200px] sm:max-w-full h-auto" src={work3} alt={t('projects.horde.alt1')} />
 		</a>
 	</div>
 </section>

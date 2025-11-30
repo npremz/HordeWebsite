@@ -1,0 +1,64 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Container from '../../components/Container.astro';
+import Footer from '../../components/Footer.astro';
+import HorizontalLine from '../../components/HorizontalLine.astro';
+---
+
+<Layout 
+	title="Horde - Cookie Policy"
+	description="Cookie usage policy of Horde Agency."
+>
+	<Container>
+		<main class="mt-32 mb-20 mx-(--line-margin) md:mt-48 lg:mx-20 xl:mx-48">
+			<h1 class="text-[2.25rem] leading-none mb-12 font-editorial sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]">Cookie Policy</h1>
+			
+			<div class="flex flex-col gap-10 text-lg leading-relaxed opacity-80 max-w-3xl">
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">1. What is a cookie?</h2>
+					<p>
+						A cookie is a small text file deposited on your terminal (computer, tablet or mobile) when visiting a website. It allows its issuer to identify the terminal in which it is stored, during the validity or storage period of the cookie.
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">2. The cookies we use</h2>
+					<p class="mb-4">
+						The Horde Agency website uses only cookies strictly necessary for the proper functioning of the site. These cookies do not require your prior consent.
+					</p>
+					<ul class="list-disc pl-5 space-y-2">
+						<li>
+							<strong>Technical cookies:</strong> These cookies are essential for browsing our site and using the main features (such as the correct display of the site according to your device).
+						</li>
+						<li>
+							<strong>Performance cookies (anonymous):</strong> We may use privacy-friendly audience measurement tools that do not collect identifiable personal data.
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">3. Cookie management</h2>
+					<p>
+						Although the cookies we use are essential, you can configure your browser at any time to refuse cookies. However, this could alter your user experience on our site.
+					</p>
+					<p class="mt-2">
+						The configuration of each browser is different. It is described in the help menu of your browser, which will allow you to know how to modify your wishes regarding cookies.
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">4. Contact us</h2>
+					<p>
+						For any questions regarding our cookie policy, you can contact us at the following address: <a href="mailto:hello@hordeagence.com" class="underline hover:no-underline">hello@hordeagence.com</a>.
+					</p>
+				</section>
+
+				<p class="text-sm mt-8 pt-8 border-t border-outline">
+					Last update: November 29, 2025
+				</p>
+			</div>
+		</main>
+		<HorizontalLine></HorizontalLine>
+		<Footer></Footer>
+	</Container>
+</Layout>

@@ -4,40 +4,45 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
+
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <form id="contact-form" class=`${className} flex flex-col gap-8 md:gap-16 lg:max-w-[1100px]`>
 	<div class="flex flex-col gap-8">
-		<label for="name">1/ Votre nom & prénom *</label>
+		<label for="name">{t('contact.name')}</label>
 		<input 
 			class="px-2.5 py-2.5 border border-labels"
 			type="text" 
 			id="name" 
 			name="name" 
-			placeholder="Entrez votre nom complet" 
+			placeholder={t('contact.name_placeholder')} 
 			required 
 		/>
 	</div>
 
 	<div class="flex flex-col gap-8">
-		<label for="email">2/ Votre email *</label>
+		<label for="email">{t('contact.email')}</label>
 		<input 
 			class="px-2.5 py-2.5 border border-labels"
 			type="email" 
 			id="email" 
 			name="email" 
-			placeholder="Entrez votre adresse email" 
+			placeholder={t('contact.email_placeholder')} 
 			required 
 		/>
 	</div>
 
 	<div class="flex flex-col gap-8">
-		<label for="message">3/ Rédigez votre demande *</label>
+		<label for="message">{t('contact.message')}</label>
 		<textarea 
 			class="px-2.5 py-2.5 border border-labels"
 			id="message" 
 			name="message" 
-			placeholder="Votre message" 
+			placeholder={t('contact.message_placeholder')} 
 			required
 			rows="6"
 		></textarea>
@@ -52,11 +57,11 @@ const { class: className = '' } = Astro.props;
 					id="marketing" 
 					name="marketing" 
 				/>
-				<span class="block pl-4">Je donne mon accord pour l'envoi de communications marketing.</span>
+				<span class="block pl-4">{t('contact.marketing')}</span>
 			</label>
 		</div>
 		
-		<button type="submit" class="leading-none cursor-pointer px-2.5 py-4 bg-fond text-fonddark uppercase tracking-wider lg:px-10 lg:py-6 ">Transmettre</button>
+		<button type="submit" class="leading-none cursor-pointer px-2.5 py-4 bg-fond text-fonddark uppercase tracking-wider lg:px-10 lg:py-6 ">{t('contact.submit')}</button>
 	</div>
 </form>
 

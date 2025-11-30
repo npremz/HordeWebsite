@@ -1,5 +1,39 @@
 ---
 import Wrapped from './Wrapped.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const weatherTranslations = {
+	loading: t('weather.loading'),
+	unavailable: t('weather.unavailable'),
+	days: t('weather.days').split(','),
+	codes: {
+		0: [t('weather.0'), '☀️'],
+		1: [t('weather.1'), '⛅'],
+		2: [t('weather.2'), '☁️'],
+		3: [t('weather.3'), '☁️'],
+		45: [t('weather.45'), '🌫️'],
+		48: [t('weather.48'), '🌫️'],
+		51: [t('weather.51'), '🌧️'],
+		53: [t('weather.53'), '🌧️'],
+		55: [t('weather.55'), '🌧️'],
+		61: [t('weather.61'), '🌧️'],
+		63: [t('weather.63'), '🌧️'],
+		65: [t('weather.65'), '🌧️'],
+		71: [t('weather.71'), '❄️'],
+		73: [t('weather.73'), '❄️'],
+		75: [t('weather.75'), '❄️'],
+		77: [t('weather.77'), '❄️'],
+		80: [t('weather.80'), '🌦️'],
+		81: [t('weather.81'), '🌦️'],
+		82: [t('weather.82'), '⛈️'],
+		95: [t('weather.95'), '⚡'],
+		96: [t('weather.96'), '⛈️'],
+		99: [t('weather.99'), '⛈️']
+	}
+};
 
 interface Props
 {
@@ -12,45 +46,22 @@ const { class: className = '' } = Astro.props;
 <div class={`flex items-center gap-1.5 w-full ${className}`}>
 	<div id="time-display" class="whitespace-nowrap ">Day --:--:--</div>
 	<Wrapped device="all" padding="0.25rem">
-		<div id="weather-display" class="whitespace-nowrap">Chargement...</div>
+		<div id="weather-display" class="whitespace-nowrap">{t('weather.loading')}</div>
 	</Wrapped>
 </div>
 
-<script>
+<script define:vars={{ weatherTranslations }}>
 	// Configuration
 	const LAT = 50.8503;
 	const LON = 4.3517;
 	
-	const weatherCodes: Record<number, [string, string]> = {
-		0: ['Ensoleillé', '☀️'],
-		1: ['Partiellement nuageux', '⛅'],
-		2: ['Nuageux', '☁️'],
-		3: ['Couvert', '☁️'],
-		45: ['Brouillard', '🌫️'],
-		48: ['Brouillard givrant', '🌫️'],
-		51: ['Bruine légère', '🌧️'],
-		53: ['Bruine', '🌧️'],
-		55: ['Bruine intense', '🌧️'],
-		61: ['Faible pluie', '🌧️'],
-		63: ['Drache', '🌧️'],
-		65: ['Grosse Drache', '🌧️'],
-		71: ['Neige faible', '❄️'],
-		73: ['Neige', '❄️'],
-		75: ['Neige forte', '❄️'],
-		77: ['Grelle', '❄️'],
-		80: ['Drache', '🌦️'],
-		81: ['Courte drache', '🌦️'],
-		82: ['Grosse drache', '⛈️'],
-		95: ['Orage', '⚡'],
-		96: ['Orage et grêle', '⛈️'],
-		99: ['Orage violent', '⛈️']
-	};
+	const weatherCodes = weatherTranslations.codes;
 
-	const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+	const days = weatherTranslations.days;
 
-	let currentWeatherText = 'Chargement...';
+	let currentWeatherText = weatherTranslations.loading;
 
-	function formatTime(date: Date): string
+	function formatTime(date)
 	{
 		const dayName = days[date.getDay()];
 		const hours = date.getHours().toString().padStart(2, '0');
@@ -68,7 +79,7 @@ const { class: className = '' } = Astro.props;
 			const data = await response.json();
 			
 			const code = data.current_weather.weathercode;
-			const weatherInfo = weatherCodes[code] || ['Indisponible', ''];
+			const weatherInfo = weatherCodes[code] || [weatherTranslations.unavailable, ''];
 			
 			// On prépare juste la string "Ensoleillé ☀️"
 			currentWeatherText = `${weatherInfo[0]} ${weatherInfo[1]}`;
@@ -76,7 +87,7 @@ const { class: className = '' } = Astro.props;
 		catch (error)
 		{
 			console.error("Erreur météo:", error);
-			currentWeatherText = "Indisponible";
+			currentWeatherText = weatherTranslations.unavailable;
 		}
 		
 		// Mise à jour immédiate du texte météo après le fetch

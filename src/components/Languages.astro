@@ -4,11 +4,26 @@ interface Props {
 }
 
 const { class: className = '' } = Astro.props;
+
+import { getLangFromUrl } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+
+let path = currentPath;
+if (path.startsWith('/en/')) {
+    path = path.substring(3);
+} else if (path === '/en') {
+    path = '/';
+}
+
+const frLink = path;
+const enLink = '/en' + (path === '/' ? '' : path);
 ---
 
-<div id="lang-dropdown" class=`hidden text-[0.875rem] ${className}`>
-	<button class="lang-option active" data-lang="fr">Français</button>
-	<button class="lang-option" data-lang="en">English</button>
+<div id="lang-dropdown" class=`text-[0.875rem] ${className}`>
+	<a href={frLink} class={`lang-option ${lang === 'fr' ? 'active' : ''}`}>Français</a>
+	<a href={enLink} class={`lang-option ${lang === 'en' ? 'active' : ''}`}>English</a>
 </div>
 
 <style>
@@ -21,19 +36,6 @@ const { class: className = '' } = Astro.props;
 </style>
 
 <script>
-	const langOptions = document.querySelectorAll('.lang-option');
-	const langDropdown = document.getElementById('lang-dropdown');
-
-	langOptions.forEach(option => {
-		option.addEventListener('click', () => {
-			
-			langOptions.forEach(opt => opt.classList.remove('active'));
-			option.classList.add('active');
-			
-			langDropdown?.classList.add('hidden');
-			
-			console.log('Language changed to:', option.getAttribute('data-lang'));
-		});
-	});
+	// Script removed as we use direct links now
 </script>
 
