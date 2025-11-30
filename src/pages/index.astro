@@ -1,30 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Container from '../components/Container.astro'
-import Hero from '../sections/Hero.astro';
-import Physics from '../sections/Physics.astro';
-import Services from '../sections/Services.astro';
-import Project from '../sections/Project.astro';
-import HorizontalLine from '../components/HorizontalLine.astro';
-import BackgroundCanvas from '../components/BackgroundCanvas.astro';
-import Footer from '../components/Footer.astro';
+import IndexPage from '../templates/IndexPage.astro';
 ---
 
-<Layout 
-	title="Horde - Agence Numérique Créative Bruxelles"
-	description="Horde est une agence numérique à Bruxelles qui transforme vos visiteurs en clients. Nous concevons des expériences web ultra-rapides et sans friction pour maximiser votre conversion."
->
-    <Container>
-		<h1 class="sr-only">Agence numérique Horde à Bruxelles</h1>
-        <main>
-            <Hero></Hero>
-            <HorizontalLine class="mt-2"></HorizontalLine>
-			<Physics></Physics>
-            <Project></Project>
-			<Services></Services>
-            <HorizontalLine class="relative -mt-16 -z-10! sm:-mt-32 md:-mt-40 lg:-mt-54 xl:-mt-64 2xl:-mt-78"></HorizontalLine>
-        </main>
-        <Footer></Footer>
-    </Container>
-    <BackgroundCanvas></BackgroundCanvas>
-</Layout>
+<IndexPage lang="fr" />

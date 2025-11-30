@@ -40,6 +40,14 @@ body {
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'PP Neue Bit';
+  src: url('/src/assets/fonts/PPNeueBit-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --breakpoint-xs: 20rem;		/* 320px - Mobile small */
   --breakpoint-sm: 40rem;		/* 640px - Mobile large */
@@ -50,6 +58,7 @@ body {
   
   --font-editorial: 'PP Editorial New', serif;
   --font-fraktion: 'PP Fraktion Sans', sans-serif;
+  --font-neuebit: 'PP Neue Bit', sans-serif;
   
   --color-outline: #c4c4c4;
   --color-outlinedark: #3D3D3D;

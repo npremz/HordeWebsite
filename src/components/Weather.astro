@@ -10,28 +10,28 @@ const weatherTranslations = {
 	unavailable: t('weather.unavailable'),
 	days: t('weather.days').split(','),
 	codes: {
-		0: [t('weather.0'), '☀️'],
+		0: [t('weather.0'), '☀'],
 		1: [t('weather.1'), '⛅'],
-		2: [t('weather.2'), '☁️'],
-		3: [t('weather.3'), '☁️'],
-		45: [t('weather.45'), '🌫️'],
-		48: [t('weather.48'), '🌫️'],
-		51: [t('weather.51'), '🌧️'],
-		53: [t('weather.53'), '🌧️'],
-		55: [t('weather.55'), '🌧️'],
-		61: [t('weather.61'), '🌧️'],
-		63: [t('weather.63'), '🌧️'],
-		65: [t('weather.65'), '🌧️'],
-		71: [t('weather.71'), '❄️'],
-		73: [t('weather.73'), '❄️'],
-		75: [t('weather.75'), '❄️'],
-		77: [t('weather.77'), '❄️'],
-		80: [t('weather.80'), '🌦️'],
-		81: [t('weather.81'), '🌦️'],
-		82: [t('weather.82'), '⛈️'],
+		2: [t('weather.2'), '☁'],
+		3: [t('weather.3'), '☁'],
+		45: [t('weather.45'), '☁'],
+		48: [t('weather.48'), '☁'],
+		51: [t('weather.51'), '☂'],
+		53: [t('weather.53'), '☂'],
+		55: [t('weather.55'), '☂'],
+		61: [t('weather.61'), '☂'],
+		63: [t('weather.63'), '☂'],
+		65: [t('weather.65'), '☂'],
+		71: [t('weather.71'), '❄'],
+		73: [t('weather.73'), '❄'],
+		75: [t('weather.75'), '❄'],
+		77: [t('weather.77'), '❄'],
+		80: [t('weather.80'), '☂'],
+		81: [t('weather.81'), '☂'],
+		82: [t('weather.82'), '☂'],
 		95: [t('weather.95'), '⚡'],
-		96: [t('weather.96'), '⛈️'],
-		99: [t('weather.99'), '⛈️']
+		96: [t('weather.96'), '⚡'],
+		99: [t('weather.99'), '⚡']
 	}
 };
 
@@ -82,7 +82,7 @@ const { class: className = '' } = Astro.props;
 			const weatherInfo = weatherCodes[code] || [weatherTranslations.unavailable, ''];
 			
 			// On prépare juste la string "Ensoleillé ☀️"
-			currentWeatherText = `${weatherInfo[0]} ${weatherInfo[1]}`;
+			currentWeatherText = `${weatherInfo[0]} <span class="font-neuebit text-lg">${weatherInfo[1]}</span>`;
 		}
 		catch (error)
 		{
@@ -94,7 +94,7 @@ const { class: className = '' } = Astro.props;
 		const weatherEl = document.getElementById('weather-display');
 		if (weatherEl)
 		{
-			weatherEl.innerText = currentWeatherText;
+			weatherEl.innerHTML = currentWeatherText;
 		}
 	}
 

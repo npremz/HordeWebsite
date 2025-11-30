@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro'
+import Hero from '../sections/Hero.astro';
+import Physics from '../sections/Physics.astro';
+import Services from '../sections/Services.astro';
+import Project from '../sections/Project.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
+import Footer from '../components/Footer.astro';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+    lang: 'fr' | 'en';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<Layout 
+	title={t('site.title')}
+	description={t('site.description')}
+>
+    <Container>
+		<h1 class="sr-only">{t('site.h1')}</h1>
+        <main>
+            <Hero></Hero>
+            <HorizontalLine class="mt-2"></HorizontalLine>
+			<Physics></Physics>
+            <Project></Project>
+			<Services></Services>
+            <HorizontalLine class="relative -mt-16 -z-10! sm:-mt-32 md:-mt-40 lg:-mt-54 xl:-mt-64 2xl:-mt-78"></HorizontalLine>
+        </main>
+        <Footer></Footer>
+    </Container>
+    <BackgroundCanvas></BackgroundCanvas>
+</Layout>

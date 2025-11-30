@@ -15,7 +15,7 @@ const t = useTranslations(lang);
 	<div class="flex flex-col gap-8">
 		<label for="name">{t('contact.name')}</label>
 		<input 
-			class="px-2.5 py-2.5 border border-labels"
+			class="px-2.5 py-2.5 md:px-4 md:py-5 border border-labels"
 			type="text" 
 			id="name" 
 			name="name" 
@@ -27,7 +27,7 @@ const t = useTranslations(lang);
 	<div class="flex flex-col gap-8">
 		<label for="email">{t('contact.email')}</label>
 		<input 
-			class="px-2.5 py-2.5 border border-labels"
+			class="px-2.5 py-2.5 md:px-4 md:py-5 border border-labels"
 			type="email" 
 			id="email" 
 			name="email" 
@@ -39,7 +39,7 @@ const t = useTranslations(lang);
 	<div class="flex flex-col gap-8">
 		<label for="message">{t('contact.message')}</label>
 		<textarea 
-			class="px-2.5 py-2.5 border border-labels"
+			class="px-2.5 py-2.5 md:px-4 md:py-5 border border-labels"
 			id="message" 
 			name="message" 
 			placeholder={t('contact.message_placeholder')} 

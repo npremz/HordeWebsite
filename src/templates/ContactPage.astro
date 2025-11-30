@@ -1,0 +1,114 @@
+---
+import Container from "../components/Container.astro";
+import Layout from "../layouts/Layout.astro";
+import Footer from '../components/Footer.astro';
+import Carousel from '../components/Carousel.astro';
+import Wrapped from "../components/Wrapped.astro";
+import HorizontalLine from '../components/HorizontalLine.astro';
+import ContactForm from "../components/ContactForm.astro";
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+    lang: 'fr' | 'en';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const translations = {
+    sending: t('contact.sending'),
+    success: t('contact.success'),
+    error: t('contact.error'),
+    error_send: t('contact.error_send'),
+    submit: t('contact.submit')
+};
+---
+
+<Layout 
+	title={t('contact.title')}
+	description={t('contact.description')}
+	theme="dark"
+>
+	<Container>
+		<h1 class="sr-only">{t('contact.h1')}</h1>
+		<main>
+			<section class="relative h-halfscreen flex flex-col items-center xl:h-[70svh]">
+				<span class="absolute  h-full w-circles border border-outlinedark -top-(--line-margin) left-1/2 -translate-x-1/2 rounded-b-full lg:aspect-square lg:w-full lg:h-auto lg:top-auto lg:bottom-(--line-margin)"></span>
+
+				<Carousel class="top-1/2 left-0! translate-x-0! -translate-y-1/2 z-10 text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]">
+					{t('contact.carousel')}
+					→
+				</Carousel>
+				<Wrapped device='all' padding='0.625rem' class="absolute top-full -translate-y-24 md:-translate-y-28 lg:-translate-y-32">
+					↓
+				</Wrapped>
+			</section>
+            <HorizontalLine class="mt-2" theme="dark"></HorizontalLine>
+			<ContactForm class="mx-(--line-margin) mt-10 md:mt-20 lg:relative lg:left-1/2 lg:-translate-x-1/2 lg:mx-0 lg:my-44"></ContactForm>
+            <HorizontalLine class="mt-12 md:mt-20" theme="dark"></HorizontalLine>
+		</main>
+		<Footer class="mt-12 md:mt-20"></Footer>
+	</Container>
+</Layout>
+
+<script define:vars={{ translations }}>
+	if (typeof window !== 'undefined') {
+		const registerFormHandling = () => {
+			const form = document.getElementById('contact-form');
+			if (!(form instanceof HTMLFormElement)) return;
+			const submitBtn = form.querySelector('button[type="submit"]');
+
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				const formData = new FormData(form);
+				const data = {
+					name: formData.get('name'),
+					email: formData.get('email'),
+					message: formData.get('message'),
+					marketing: formData.get('marketing') === 'on'
+				};
+
+				if (submitBtn instanceof HTMLButtonElement) {
+					submitBtn.disabled = true;
+					submitBtn.textContent = translations.sending;
+				}
+
+				try {
+					const response = await fetch('/api/contact', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(data)
+					});
+
+					const result = await response.json();
+
+					if (result.success) {
+						form.reset();
+						alert(translations.success);
+					} else {
+						alert(translations.error + result.error);
+					}
+				} catch (error) {
+					alert(translations.error_send);
+				} finally {
+					if (submitBtn instanceof HTMLButtonElement) {
+						submitBtn.disabled = false;
+						submitBtn.textContent = translations.submit;
+					}
+				}
+			});
+		};
+
+		const schedule = () => {
+			const idle = window.requestIdleCallback || ((cb) => window.setTimeout(cb, 0));
+			idle(registerFormHandling);
+		};
+
+		if (document.readyState === 'complete') {
+			schedule();
+		} else {
+			window.addEventListener('load', schedule, { once: true });
+		}
+	}
+</script>

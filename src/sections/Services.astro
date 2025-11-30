@@ -12,13 +12,13 @@ const t = useTranslations(lang);
 		<div class="relative flex flex-col items-center gap-8 z-10 my-40 sm:mt-84 sm:mb-64 sm:gap-24 md:my-0 md:min-h-svh lg:min-h-0 lg:aspect-square">
 			<DisplayText tag='h2' class='md:pt-[400px] lg:pt-60 2xl:pt-150'>{t('services.title')}</DisplayText>
 			
-			<div class="relative flex flex-col gap-16 text-center sm:gap-24 md:contents">
+			<div class="relative flex flex-col gap-16 text-center md:items-left sm:gap-24 md:contents">
 				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
 					<svg class="float-svg w-[110px] sm:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[500px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-72" viewBox="0 0 300 253" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M242.504 115.847C261.749 109.679 282.338 120.301 288.493 139.571L299.638 174.463L264.792 185.63L242.504 115.847ZM90.5622 241.466L55.7168 252.634L44.5722 217.742C38.4177 198.472 49.0287 177.851 68.2732 171.684L90.5622 241.466ZM265.44 184.372L298.382 173.815L287.541 139.876C281.656 121.45 262.203 111.154 243.764 116.507L265.44 184.372ZM67.6292 172.956C49.5135 179.319 39.6389 199.013 45.5241 217.439L56.3644 251.376L89.3042 240.819L67.6292 172.956ZM207.662 127.013L218.805 161.905L183.961 173.073L172.816 138.181L207.662 127.013ZM137.97 149.349L149.114 184.241L114.267 195.408L103.124 160.515L137.97 149.349ZM184.608 171.815L217.55 161.258L207.013 128.272L174.072 138.828L184.608 171.815ZM114.916 194.148L147.856 183.592L137.321 150.605L104.38 161.162L114.916 194.148ZM231.361 80.9542L242.506 115.846L207.66 127.013L196.516 92.1217L231.361 80.9542ZM115.681 79.565L126.824 114.454L161.667 103.29L150.522 68.3986L185.368 57.232L196.513 92.1238L161.667 103.29L172.81 138.181L137.965 149.348L126.821 114.457L91.9786 125.623L80.8342 90.7319L115.681 79.565ZM91.977 125.624L103.119 160.516L68.2754 171.684L57.1307 136.792L91.977 125.624ZM208.307 125.755L241.249 115.198L230.713 82.2116L197.773 92.7678L208.307 125.755ZM128.081 115.104L128.077 115.104L138.613 148.09L171.554 137.533L161.019 104.547L128.081 115.102L128.081 115.104ZM68.9227 170.425L101.864 159.868L91.3272 126.882L58.3863 137.438L68.9227 170.425ZM243.921 0.000879993L255.066 34.8936C261.22 54.1635 250.609 74.7845 231.365 80.952L209.075 11.1675L243.921 0.000879993ZM34.8458 67.006L57.1338 136.789C38.1899 142.86 17.9426 132.662 11.4436 113.961L11.1448 113.064L0.00011969 78.1726L34.8458 67.006ZM232.008 79.6792C250.124 73.3162 259.998 53.6224 254.113 35.1964L243.272 1.2592L210.332 11.8154L232.008 79.6792ZM162.314 102.032L195.254 91.4753L184.72 58.4891L151.778 69.045L162.314 102.032ZM92.6265 124.366L125.565 113.81L125.564 113.809L125.568 113.807L115.031 80.8226L82.091 91.3788L92.6265 124.366ZM12.0963 112.76C17.9815 131.186 37.4337 141.48 55.8722 136.127L34.1966 68.2625L1.25598 78.8199L12.0963 112.76Z" fill="#C4C4C4"/>
 					</svg>
-					<h3 class="text-[2.25rem] font-editorial relative pb-2">{t('services.tech.title')}</h3>
-					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+					<h3 class="text-[2.25rem] font-editorial relative pb-2 md:w-full md:text-left">{t('services.tech.title')}</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7 md:text-left md:w-full">
 						<li class="relative">Cutting Edge Frameworks</li>
 						<li class="relative">SQL & noSQL</li>
 						<li class="relative">N8N</li>
@@ -27,13 +27,13 @@ const t = useTranslations(lang);
 					</ul>
 				</div>
 
-				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
+				<div class="float-item relative flex flex-col items-center md:items-start gap-5 sm:gap-8">
 					<svg class="float-svg w-[80px] sm:w-[219px] lg:w-[250px] xl:w-[290px] 2xl:w-[380px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-52" viewBox="0 0 219 219" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M185.214 183.394L177.255 217.943L142.704 209.984L150.663 175.435L185.214 183.394ZM114.151 167.023L106.192 201.572L71.6413 193.613L79.6012 159.063L114.151 167.023ZM43.1097 150.658L35.1508 185.207L0.598966 177.248L8.5588 142.699L43.1097 150.658ZM115.369 166.276C119.996 147.373 138.849 135.581 157.873 139.691L149.915 174.234L115.369 166.276ZM52.2687 115.369C71.1734 119.997 82.9648 138.847 78.8546 157.87L44.3105 149.912L52.2687 115.369ZM201.572 112.347L193.613 146.896L159.062 138.936L167.022 104.388L201.572 112.347ZM59.477 79.6084L51.5181 114.157L16.9663 106.198L24.9251 71.6492L59.477 79.6084ZM174.244 68.6378L166.286 103.18C147.382 98.5521 135.588 79.7011 139.7 60.6784L174.244 68.6378ZM103.176 52.2646C98.5478 71.1683 79.6957 82.9594 60.6714 78.8482L68.6306 44.3051L103.176 52.2646ZM217.941 41.2997L209.983 75.8486L175.431 67.8895L183.39 33.3405L217.941 41.2997ZM146.891 24.9265L138.932 59.4744L104.382 51.5154L112.34 16.9674L146.891 24.9265ZM75.8462 8.5587L67.8874 43.1077L33.3355 35.1485L41.2953 0.599629L75.8462 8.5587Z" stroke="#C4C4C4" fill="none" />
 					</svg>
 
-					<h3 class="text-[2.25rem] font-editorial relative pb-2">{t('services.design.title')}</h3>
-					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+					<h3 class="text-[2.25rem] font-editorial relative pb-2 md:w-full md:text-left">{t('services.design.title')}</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7 md:text-left md:w-full">
 						<li class="relative">Logo</li>
 						<li class="relative">Web design</li>
 						<li class="relative">Art direction</li>
@@ -44,13 +44,13 @@ const t = useTranslations(lang);
 					</ul>
 				</div>
 
-				<div class="float-item relative flex flex-col items-center gap-5 sm:gap-8">
+				<div class="float-item relative flex flex-col items-center md:items-left gap-5 sm:gap-8">
 					<svg class="float-svg w-[95px] sm:w-[205px] lg:w-[240px] xl:w-[280px] 2xl:w-[370px] sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-1/2 sm:w-52" viewBox="0 0 205 232" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M43.6923 186.631C49.1584 205.237 38.7151 224.737 20.3401 230.441L0.619686 163.315L33.7388 153.539L33.7404 153.542L33.9523 153.479L43.6923 186.631ZM111.7 167.448C117.032 185.601 106.847 204.625 88.9229 210.197L69.2015 143.071L101.507 133.535L101.508 133.536L101.718 133.474L111.7 167.448ZM190.097 180.713L156.765 190.553L137.043 123.42L170.374 113.581L190.097 180.713ZM67.7493 142.46L34.6301 152.237L34.6297 152.234L34.4157 152.296L4.57125 50.7116L37.9043 40.8716L67.7493 142.46ZM135.516 122.454L102.395 132.231L102.395 132.23L102.184 132.292L72.3389 30.7057L105.671 20.8658L135.516 122.454ZM204.099 102.21L170.766 112.05L150.904 44.4388C145.438 25.833 155.881 6.33165 174.256 0.627002L204.099 102.21Z" stroke="#C4C4C4" fill="none"/>
 					</svg>
 
-					<h3 class="text-[2.25rem] font-editorial relative pb-2">{t('services.dev.title')}</h3>
-					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7">
+					<h3 class="text-[2.25rem] font-editorial relative pb-2 md:w-full md:text-left">{t('services.dev.title')}</h3>
+					<ul class="flex flex-col leading-6 text-lg opacity-80 list-none p-0 sm:leading-7 md:text-left md:w-full">
 						<li class="relative">Web</li>
 						<li class="relative">App IOS</li>
 						<li class="relative">Android</li>

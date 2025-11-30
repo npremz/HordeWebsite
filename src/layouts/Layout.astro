@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import BackgroundCanvas from '../components/BackgroundCanvas.astro';
 import Seo from '../components/Seo.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
 
 interface Props {
 	title?: string;
@@ -10,18 +11,19 @@ interface Props {
 	image?: string;
 	theme?: 'light' | 'dark';
 	structuredData?: Record<string, unknown>;
+	noIndex?: boolean;
 }
 
-import { getLangFromUrl } from '../i18n/utils';
-
 const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 const {
 	title = 'Horde',
-	description = 'Horde est une agence numérique à Bruxelles qui transforme vos visiteurs en clients. Nous concevons des expériences web ultra-rapides et sans friction pour maximiser votre conversion.',
+	description = t('site.description'),
 	image = '/meta.jpg',
 	theme = 'light',
-	structuredData
+	structuredData,
+	noIndex = false
 } = Astro.props;
 
 const resolvedImage = image.startsWith('http')
@@ -41,7 +43,7 @@ const defaultStructuredData = {
 		{
 			'@type': 'ContactPoint',
 			contactType: 'Service client',
-			telephone: '+32-000-000-000',
+			telephone: '+32487479798',
 			email: 'hello@hordeagence.com',
 			availableLanguage: ['fr', 'en']
 		}
@@ -62,7 +64,7 @@ const themeClass = theme === 'dark' ? 'bg-fonddark text-white [&_svg]:fill-white
 		<link rel="preload" href="/src/assets/fonts/PPFraktionSans-Variable.ttf" as="font" type="font/ttf" crossorigin />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content={theme === 'dark' ? '#101010' : '#f1f1f1'} />
-		<Seo title={title} description={description} image={resolvedImage} />
+		<Seo title={title} description={description} image={resolvedImage} noIndex={noIndex} />
 		{schema && (
 			<script type="application/ld+json">
 				{JSON.stringify(schema)}

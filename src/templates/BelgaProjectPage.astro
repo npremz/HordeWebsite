@@ -1,0 +1,180 @@
+---
+import Container from "../components/Container.astro";
+import Layout from "../layouts/Layout.astro";
+import Footer from '../components/Footer.astro';
+import Carousel from '../components/Carousel.astro';
+import Wrapped from "../components/Wrapped.astro";
+import HorizontalLine from '../components/HorizontalLine.astro';
+import ImageContainer from '../components/ImageContainer.astro';
+import ImageRow from '../components/ImageRow.astro';
+import BackgroundCanvas from '../components/BackgroundCanvas.astro';
+import { Image } from 'astro:assets';
+import belga1 from '../assets/belga1.jpg';
+import belga2 from '../assets/belga2.jpg';
+import belga3 from '../assets/belga3.jpg';
+import belga4 from '../assets/belga4.jpg';
+import belga5 from '../assets/belga5.jpg';
+import belga6 from '../assets/belga6.jpg';
+import belga7 from '../assets/belga7.jpg';
+import belga8 from '../assets/belga8.jpg';
+import belga9 from '../assets/belga9.jpg';
+import belga10 from '../assets/belga10.jpg';
+import belga11 from '../assets/belga11.jpg';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+    lang: 'fr' | 'en';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const projectSchema = {
+	"@context": "https://schema.org",
+	"@type": "CreativeWork",
+	"name": t('projects.belga.schema.name'),
+	"headline": t('projects.belga.schema.headline'),
+	"image": new URL(belga1.src, Astro.site).toString(),
+	"creator": {
+		"@type": "Organization",
+		"name": "Horde",
+		"url": "https://www.hordeagence.com"
+	},
+	"publisher": {
+		"@type": "Organization",
+		"name": "Horde",
+		"logo": {
+			"@type": "ImageObject",
+			"url": "https://www.hordeagence.com/favicon.svg"
+		}
+	},
+	"dateCreated": "2024-09-15",
+	"description": t('projects.belga.schema.description'),
+	"genre": t('projects.belga.schema.genre'),
+	"keywords": t('projects.belga.schema.keywords')
+};
+---
+<Layout 
+	title={t('projects.belga.title')}
+	description={t('projects.belga.description')}
+	structuredData={projectSchema}
+>
+	<Container>
+		<h1 class="sr-only">{t('projects.belga.h1')}</h1>
+		<main>
+			<section class="relative mx-(--line-margin) lg:mx-20 2xl:mx-48 2xl:max-w-[1880px]">
+				<Carousel class="mt-24 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] xl:mt-88 2xl:text-[12rem]" speed={20} textColor="#010101">
+					{t('projects.belga.carousel_prefix')} 
+					<svg class="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10 xl:h-12 xl:w-12 2xl:h-15 2xl:w-15 lg:mx-2 2xl:mx-4" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2.98488 9.03125C4.6335 9.03125 5.96997 10.3682 5.96997 12.0168L2.98488 12.0168L2.98488 9.03125Z" fill="#101010"/>
+						<path d="M11.9399 9.03125C10.2913 9.03125 8.95483 10.3682 8.95483 12.0168L11.9399 12.0168L11.9399 9.03125Z" fill="#101010"/>
+						<rect y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="5.97095" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M2.98462 3.05078L5.96971 3.05078V4.24294C5.96971 5.23342 5.16676 6.03637 4.17628 6.03637H2.98462L2.98462 3.05078Z" fill="#101010"/>
+						<rect x="5.97095" y="12.0156" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="11.9402" y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M8.95483 3.05078L11.9399 3.05078V6.03637C10.2913 6.03637 8.95483 4.6994 8.95483 3.05078Z" fill="#101010"/>
+					</svg>
+					{t('projects.belga.carousel_suffix')}
+					<svg class="h-4 w-4 md:h-6 md:w-6 lg:h-10 lg:w-10 xl:h-12 xl:w-12 2xl:h-15 2xl:w-15 lg:mx-2 2xl:mx-4" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M2.98488 9.03125C4.6335 9.03125 5.96997 10.3682 5.96997 12.0168L2.98488 12.0168L2.98488 9.03125Z" fill="#101010"/>
+						<path d="M11.9399 9.03125C10.2913 9.03125 8.95483 10.3682 8.95483 12.0168L11.9399 12.0168L11.9399 9.03125Z" fill="#101010"/>
+						<rect y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="5.97095" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M2.98462 3.05078L5.96971 3.05078V4.24294C5.96971 5.23342 5.16676 6.03637 4.17628 6.03637H2.98462L2.98462 3.05078Z" fill="#101010"/>
+						<rect x="5.97095" y="12.0156" width="2.98509" height="2.98559" fill="#101010"/>
+						<rect x="11.9402" y="6.04297" width="2.98509" height="2.98559" fill="#101010"/>
+						<path d="M8.95483 3.05078L11.9399 3.05078V6.03637C10.2913 6.03637 8.95483 4.6994 8.95483 3.05078Z" fill="#101010"/>
+					</svg>)
+				</Carousel>
+				<div class="my-10 flex flex-col gap-10 sm:mt-44 sm:mb-20 sm:gap-16 lg:gap-20 lg:mb-24 xl:mt-50 xl:mb-32">
+					<div class="relative flex gap-16 md:w-full md:justify-between md:gap-10">
+						<p class="leading-loose md:max-w-[73%] lg:max-w-[920px]">{t('projects.belga.text')}</p>
+						<div class="hidden md:flex md:flex-col md:gap-10">
+							<h3 class="uppercase leading-none md:leading-loose">{t('projects.type')}</h3>
+							<ul class="leading-none flex flex-col gap-3">
+								<li>{t('projects.types.webdesign')}</li>
+								<li>{t('projects.types.react')}</li>
+								<li>{t('projects.types.animation')}</li>
+								<li>{t('projects.types.uiux')}</li>
+							</ul>
+						</div>
+					</div>
+					<div class="flex justify-between">
+						<a target="_blank" href="https://belga.nicolas-premont.be">
+							<Wrapped device="all">
+								{t('projects.view')} →
+							</Wrapped>
+						</a>
+						<Wrapped device="all">↓</Wrapped>
+					</div>
+				</div>
+				<HorizontalLine class="mt-2"></HorizontalLine>
+				<ImageContainer class="gap-4 -mt-px md:gap-6 lg:gap-9 xl:gap-12 2xl:gap-15">
+					<ImageRow span={2}>
+						<Image src={belga1} alt={t('projects.belga.alt1')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={2}>
+						<Image src={belga2} alt={t('projects.belga.alt2')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga3} alt={t('projects.belga.alt3')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga4} alt={t('projects.belga.alt4')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={2}>
+						<Image src={belga5} alt={t('projects.belga.alt5')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga6} alt={t('projects.belga.alt6')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga7} alt={t('projects.belga.alt7')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={2}>
+						<Image src={belga8} alt={t('projects.belga.alt8')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga9} alt={t('projects.belga.alt9')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={1}>
+						<Image src={belga10} alt={t('projects.belga.alt10')} class="object-cover w-full" />
+					</ImageRow>
+					<ImageRow span={2}>
+						<Image src={belga11} alt={t('projects.belga.alt11')} class="object-cover w-full" />
+					</ImageRow>
+				</ImageContainer>
+				<div class="mt-10 flex flex-col gap-10 sm:relative sm:mt-16 sm:gap-16 xl:my-24 xl:gap-24">
+					<h3 class="uppercase leading-none md:hidden">{t('projects.type')}</h3>
+					<ul class="leading-none flex flex-col gap-3 md:hidden">
+						<li>{t('projects.types.webdesign')}</li>
+						<li>{t('projects.types.react')}</li>
+						<li>{t('projects.types.animation')}</li>
+						<li>{t('projects.types.uiux')}</li>
+					</ul>
+					<div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-center sm:justify-between">
+						<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.9645 24.0664C12.3639 24.0664 15.9304 27.6328 15.9304 32.0322L7.9645 32.0322L7.9645 24.0664Z" fill="#101010"/>
+							<path d="M31.8663 24.0664C27.4669 24.0664 23.9004 27.6328 23.9004 32.0322L31.8663 32.0322L31.8663 24.0664Z" fill="#101010"/>
+							<rect y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="15.9304" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M7.96533 8.13281H15.9313C15.9313 12.5322 12.3647 16.0986 7.96533 16.0986L7.96533 8.13281Z" fill="#101010"/>
+							<rect x="15.9304" y="32.0352" width="7.96592" height="7.96579" fill="#101010"/>
+							<rect x="31.8606" y="16.1016" width="7.96592" height="7.96579" fill="#101010"/>
+							<path d="M23.9004 8.13281H31.8663V16.0986C27.4669 16.0986 23.9004 12.5322 23.9004 8.13281Z" fill="#101010"/>
+						</svg>
+						<button class="cursor-pointer px-2.5 py-2.5 border border-outline text-fonddark uppercase tracking-wider sm:px-10 sm:py-4 sm:w-fit">{t('projects.view_all')}</button>
+					</div>
+				</div>
+			</section>
+			<HorizontalLine class="mt-10 sm:mt-16"></HorizontalLine>
+		</main>
+		<Footer class="mt-12 sm:mt-16"></Footer>
+	</Container>
+    <BackgroundCanvas 
+		targetId="imgContainer"
+		topOffset={800}
+		bottomOffset={-900}
+	></BackgroundCanvas>
+</Layout>

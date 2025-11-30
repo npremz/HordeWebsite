@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro';
+import Footer from '../components/Footer.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+    lang: 'fr' | 'en';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<Layout 
+	title={t('cookies.title')}
+	description={t('cookies.description')}
+>
+	<Container>
+		<main class="mt-32 mb-20 mx-(--line-margin) md:mt-48 lg:mx-20 xl:mx-48">
+			<h1 class="text-[2.25rem] leading-none mb-12 font-editorial sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]">{t('cookies.h1')}</h1>
+			
+			<div class="flex flex-col gap-10 text-lg leading-relaxed opacity-80 max-w-3xl">
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">{t('cookies.sec1.title')}</h2>
+					<p>
+						{t('cookies.sec1.text')}
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">{t('cookies.sec2.title')}</h2>
+					<p class="mb-4">
+						{t('cookies.sec2.text')}
+					</p>
+					<ul class="list-disc pl-5 space-y-2">
+						<li set:html={t('cookies.sec2.li1')}></li>
+						<li set:html={t('cookies.sec2.li2')}></li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">{t('cookies.sec3.title')}</h2>
+					<p>
+						{t('cookies.sec3.text1')}
+					</p>
+					<p class="mt-2">
+						{t('cookies.sec3.text2')}
+					</p>
+				</section>
+
+				<section>
+					<h2 class="text-xl font-bold mb-4 text-fonddark opacity-100">{t('cookies.sec4.title')}</h2>
+					<p set:html={t('cookies.sec4.text')}></p>
+				</section>
+
+				<p class="text-sm mt-8 pt-8 border-t border-outline">
+					{t('cookies.update')}
+				</p>
+			</div>
+		</main>
+		<HorizontalLine></HorizontalLine>
+		<Footer></Footer>
+	</Container>
+</Layout>

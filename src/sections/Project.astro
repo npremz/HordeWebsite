@@ -11,6 +11,7 @@ const t = useTranslations(lang);
 ---
 
 <section id="projects" class="my-60 flex flex-col gap-16 mx-(--line-margin) sm:gap-24 sm:my-80 md:gap-48 md:my-96 xl:gap-60 xl:my-150">
+	<h2 class="sr-only">{t('projects.title')}</h2>
 	<Carousel class='text-[2.25rem] sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] 2xl:text-[12rem]'>{t('projects.title')}</Carousel>
 	<div class="relative z-10 flex flex-col items-center gap-16 w-full sm:grid sm:grid-cols-3 sm:items-start">
 		<a href={lang === 'fr' ? "/projects/belga" : "/en/projects/belga"} class="sm:max-w-full sm:justify-self-start">
