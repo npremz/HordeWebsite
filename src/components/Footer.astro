@@ -15,12 +15,12 @@ interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<footer class={`relative mt-8 flex flex-col gap-12 z-20 sm:mt-20 md:gap-24 lg:mt-24 lg:gap-44 2xl:gap-60 ${className}`} role="contentinfo">
+<footer class={`relative mt-8 flex flex-col gap-12 z-20 sm:mt-20 md:gap-24 lg:mt-24 lg:gap-44 lg:w-[calc(100%+2*var(--line-margin))] lg:-ml-(--line-margin) 2xl:gap-60 ${className}`} role="contentinfo">
 	{
 		lang === 'fr' ? <FooterFr /> : <FooterEn />
 	}
 
-	<ul class="flex flex-col items-center text-center gap-5 mb-16 lg:grid lg:grid-cols-3 lg:items-center">
+	<ul class="flex flex-col items-center text-center gap-5 mb-16 lg:grid lg:grid-cols-3 lg:items-center lg:w-[calc(100%+2*var(--line-margin))] lg:-ml-(--line-margin)">
 		<li class="lg:col-start-2 lg:justify-self-center">
 			<TextLink href="mailto:hello@hordeagence.com" class='block! md:hidden!'>hello@hordeagence.com</TextLink>
 			<a href="mailto:hello@hordeagence.com">
@@ -101,7 +101,7 @@ const { class: className = '' } = Astro.props;
 		<li class="lg:justify-self-end">
 			<a href="#">Horde Agence E.I.</a>
 		</li>
-		<li class="lg:col-start-1 lg:row-start-1 lg:justify-self-start">
+		<li class="lg:col-start-1 lg:row-start-1 lg:justify-self-start ">
 			<a href={lang === 'fr' ? "/politique-des-cookies" : "/en/cookie-policy"}>{t('footer.cookie_policy')}</a>
 		</li>
 	</ul>
