@@ -22,7 +22,7 @@ const { class: className = '' } = Astro.props;
 		<!-- Mobile/Tablet: 2 elements (logo left, menu right) -->
 		<nav class="flex justify-between items-center lg:hidden" aria-label="Mobile navigation">
 			<a href={homeUrl} aria-label={t('nav.home')}>
-				<svg width="37" height="13" viewBox="0 0 37 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<svg width="37" height="13" viewBox="0 0 37 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
 					<rect x="19.7373" y="2.51758" width="2.43499" height="10.0636"/>
 					<rect x="21.7637" y="5.0332" width="12.9866" height="2.51589"/>
 					<path d="M22.1753 2.51589C22.1753 1.1264 23.3017 0 24.6912 0H34.3502V2.51589H22.1753Z"/>
@@ -34,9 +34,7 @@ const { class: className = '' } = Astro.props;
 			</a>
 			<a href={contactUrl} class="cursor-pointer">
 				<Wrapped padding='0.75rem' device='all' class='text-[1rem]'>
-					<button id="lang-toggle" class="cursor-pointer">
-						<span id="current-lang">{t('nav.contact')}</span>
-					</button>
+					<span id="current-lang">{t('nav.contact')}</span>
 				</Wrapped>
 			</a>
 		</nav>
@@ -48,7 +46,7 @@ const { class: className = '' } = Astro.props;
 			<div class="justify-self-center">
 				<a href={homeUrl} aria-label={t('nav.home')}>
 					<Wrapped padding='1.375rem' device='lg'>
-						<svg width="57" height="19" viewBox="0 0 57 19" xmlns="http://www.w3.org/2000/svg">
+						<svg width="57" height="19" viewBox="0 0 57 19" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
 							<g clip-path="url(#clip0_556_5351)">
 							<path d="M0.00534019 5.90862e-07H3.77348V7.59944C1.6924 7.59944 0.00534019 5.95295 0.00534019 3.92191V5.90862e-07Z"/>
 							<path d="M22.6185 0H26.3866V3.9219C26.3866 5.95295 24.6996 7.59944 22.6185 7.59944V0Z"/>
@@ -70,9 +68,7 @@ const { class: className = '' } = Astro.props;
 			<div class="justify-self-end">
 				<a href={contactUrl} class="cursor-pointer">
 					<Wrapped padding='0.75rem' device='lg' class='text-[1rem]'>
-						<button id="lang-toggle" class="cursor-pointer">
-							<span id="current-lang">{t('nav.contact')}</span>
-						</button>
+						<span id="current-lang">{t('nav.contact')}</span>
 					</Wrapped>
 				</a>
 			</div>
