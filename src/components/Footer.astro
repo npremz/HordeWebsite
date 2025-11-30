@@ -25,7 +25,7 @@ const { class: className = '' } = Astro.props;
 			<TextLink href="mailto:hello@hordeagence.com" class='block! md:hidden!'>hello@hordeagence.com</TextLink>
 			<a href="mailto:hello@hordeagence.com">
 				<Wrapped class='hidden! md:flex!' padding='2rem'>
-					<svg width="598" height="19" viewBox="0 0 598 19" xmlns="http://www.w3.org/2000/svg">
+					<svg width="598" height="19" viewBox="0 0 598 19" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
 						<rect x="119.552" y="4.28125" width="3.67951" height="11.0386"/>
 						<path d="M123.227 4.27913C123.227 2.24699 124.874 0.599609 126.907 0.599609H141.625V4.27913H123.227Z"/>
 						<path d="M123.227 15.3184H141.625C141.625 17.3505 139.977 18.9979 137.945 18.9979H123.227V15.3184Z"/>
@@ -96,6 +96,7 @@ const { class: className = '' } = Astro.props;
 						<rect x="509.049" y="15.3184" width="22.0771" height="3.67952"/>
 					</svg>
 				</Wrapped>
+				<span class="sr-only">hello@hordeagence.com</span>
 			</a>
 		</li>
 		<li class="lg:justify-self-end">

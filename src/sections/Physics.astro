@@ -322,10 +322,21 @@ const t = useTranslations(lang);
 			};
 		};
 
+		const scheduleInit = () => {
+			if ('requestIdleCallback' in window)
+			{
+				requestIdleCallback(() => initPhysics());
+			}
+			else
+			{
+				setTimeout(() => initPhysics(), 0);
+			}
+		};
+
 		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', initPhysics);
+			document.addEventListener('DOMContentLoaded', scheduleInit);
 		} else {
-			initPhysics();
+			scheduleInit();
 		}
 
 		window.addEventListener('resize', () => {
@@ -334,7 +345,7 @@ const t = useTranslations(lang);
 
 			clearTimeout(resizeTimeout);
 			resizeTimeout = setTimeout(() => {
-				initPhysics();
+				scheduleInit();
 			}, 300);
 		});
 	}
