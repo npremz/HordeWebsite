@@ -180,7 +180,7 @@ Composant de carousel infini avec défilement automatique et support de contenu 
 - `textColor` : Classe Tailwind pour la couleur (défaut: text-white)
 
 ### BackgroundCanvas
-Animation de particules interactives en arrière-plan avec Matter.js.
+Animation de particules interactives en arrière-plan avec.
 
 ### Wrapped
 Bouton stylisé avec bordures dynamiques et effets hover personnalisés.
