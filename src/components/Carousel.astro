@@ -10,21 +10,19 @@ const {
 	speed = 5, 
 	class: className = '' 
 } = Astro.props;
-
-const accessibleId = `carousel-aria-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-<span id={accessibleId} class="sr-only"><slot /></span>
-<div class={`carousel-container w-screen overflow-hidden left-1/2 -translate-x-1/2 ${textColor} ${className}`} aria-labelledby={accessibleId}>
-	<div class="carousel-track" aria-hidden="true" style={`--carousel-speed: ${speed}s; animation-duration: ${speed}s;`}>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
-		<span class="carousel-text relative" aria-hidden="true"><slot /></span>
+<span class="sr-only"><slot /></span>
+<div class={`carousel-container w-screen overflow-hidden left-1/2 -translate-x-1/2 ${textColor} ${className}`} aria-hidden="true" role="presentation">
+	<div class="carousel-track" style={`--carousel-speed: ${speed}s; animation-duration: ${speed}s;`}>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
+		<span class="carousel-text relative"><slot /></span>
 	</div>
 </div>
 

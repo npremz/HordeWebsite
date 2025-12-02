@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Container from '../components/Container.astro';
+import Carousel from '../components/Carousel.astro';
+import Wrapped from '../components/Wrapped.astro';
+import HorizontalLine from '../components/HorizontalLine.astro';
+import Footer from '../components/Footer.astro';
+import { Image } from 'astro:assets';
+import work1 from '../assets/work1.jpg';
+import work2 from '../assets/work2.jpg';
+import work3 from '../assets/work3.jpg';
+import { useTranslations } from '../i18n/utils';
+
+interface Props {
+    lang: 'fr' | 'en';
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const projectBasePath = lang === 'fr' ? '/projects' : '/en/projects';
+---
+
+<Layout
+	title={t('projects.page.title')}
+	description={t('projects.page.description')}
+	theme="dark"
+>
+	<Container>
+		<h1 class="sr-only">{t('projects.page.h1')}</h1>
+		<main>
+			<section id="projects" class="relative flex flex-col">
+				<div class="flex flex-col items-center">
+					<Carousel class="left-0! translate-x-0! -translate-y-1/2 mt-32 text-[2.25rem] sm:mt-56 sm:text-[3.25rem] md:text-[5rem] lg:text-[6rem] xl:text-[10rem] xl:mt-88 2xl:text-[12rem]">
+						{t('projects.title')}
+					</Carousel>
+				</div>
+				<div class="mt-10 md:mt-20 flex flex-col gap-16 mx-(--line-margin) sm:gap-24 md:gap-48 xl:gap-60 my-10 sm:mt-44 sm:mb-20 lg:gap-20 lg:mb-24 xl:mt-50 xl:mb-32">
+					<h2 class="sr-only">{t('projects.title')}</h2>
+					<div class="relative z-10 flex flex-col items-center gap-16 w-full sm:grid sm:grid-cols-3 sm:items-start">
+						<a href={`${projectBasePath}/belga`} class="sm:max-w-full sm:justify-self-start">
+							<Image class="max-w-[200px] sm:max-w-full h-auto" src={work1} alt={t('projects.belga.alt1')} />
+						</a>
+						<a href={`${projectBasePath}/belga`} class="sm:max-w-full sm:justify-self-center sm:mt-16 md:mt-24 lg:mt-40 xl:mt-52 2xl:mt-64">
+							<Image class="max-w-[200px] sm:max-w-full h-auto" src={work2} alt={t('projects.belga.alt2')} />
+						</a>
+						<a href={`${projectBasePath}/belga`} class="sm:max-w-full sm:justify-self-end">
+							<Image class="max-w-[200px] sm:max-w-full h-auto" src={work3} alt={t('projects.horde.alt1')} />
+						</a>
+					</div>
+				</div>
+			</section>
+			<HorizontalLine class="mt-12 md:mt-20" theme="dark"></HorizontalLine>
+		</main>
+		<Footer class="mt-12 md:mt-20"></Footer>
+	</Container>
+</Layout>
