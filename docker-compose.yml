@@ -4,6 +4,4 @@ services:
     container_name: horde
     restart: unless-stopped
     ports:
-      - "4321:4321"
-    env_file:
-      - .env
+      - "${PORT}:${PORT}"
