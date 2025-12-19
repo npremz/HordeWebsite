@@ -66,9 +66,7 @@ const themeClass = theme === 'dark' ? 'bg-fonddark text-white [&_svg]:fill-white
 		<meta name="theme-color" content={theme === 'dark' ? '#101010' : '#f1f1f1'} />
 		<Seo title={title} description={description} image={resolvedImage} noIndex={noIndex} />
 		{schema && (
-			<script type="application/ld+json">
-				{JSON.stringify(schema)}
-			</script>
+			<script type="application/ld+json" set:html={JSON.stringify(schema)} />
 		)}
 	</head>
 	<body class={themeClass}>
